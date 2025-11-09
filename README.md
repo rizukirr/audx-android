@@ -1,5 +1,7 @@
 # Audx - Android Audio Denoising Library
 
+[![](https://jitpack.io/v/rizukirr/audx-android.svg)](https://jitpack.io/#rizukirr/audx-android)
+[![Version](https://img.shields.io/badge/version-v1.0.0--dev01-blue.svg)](https://github.com/rizukirr/audx-android/releases)
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://android-arsenal.com/api?level=24)
 
@@ -43,6 +45,7 @@ For complete documentation, examples, and integration guides, see:
 📚 **[Full Documentation →](docs/QUICK_START.md)**
 
 The documentation includes:
+
 - Complete API reference
 - Android AudioRecord integration examples
 - Configuration options
@@ -77,11 +80,11 @@ Add the dependency in your app's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr:AudxAndroid:1.0.0-dev01")
+    implementation("com.github.rizukirr:audx-android:v1.0.0-dev01")
 }
 ```
 
-> **Latest version**: Check [Releases](https://github.com/rizukirr/AudxAndroid/releases) for the latest version.
+> **Latest version**: Check [Releases](https://github.com/rizukirr/audx-android/releases) for the latest version.
 
 ## License
 
