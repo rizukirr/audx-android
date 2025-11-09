@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- AndroidManifest for Android Library -->
+    <!-- Library consumers will merge their own application configuration -->
+
+</manifest>

@@ -1,0 +1,15 @@
+# JitPack build configuration
+# This file tells JitPack how to build your Android library
+
+# Use JDK 17 (required for Android Gradle Plugin 8+)
+jdk:
+  - openjdk17
+
+# Before building, ensure gradlew is executable
+before_install:
+  - chmod +x gradlew
+  - ./gradlew --version
+
+# Install command - publish to local Maven repository
+install:
+  - ./gradlew clean publishToMavenLocal
