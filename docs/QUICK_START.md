@@ -175,22 +175,24 @@ Denoised audio + VAD result
 
 ## 🎬 Example Files
 
-1. **`SimpleDenoiserExample.kt`** - Minimal working example (~100 lines)
-2. **`DenoiserAudioRecordingExample.kt`** - Full production example with chunking
-3. **`INTEGRATION_GUIDE.md`** - How to modify your existing recorder
+[Example Usage](https://github.com/rizukirr/audx-android/blob/main/app/src/main/java/com/android/audx/examples/DenoiserAudioRecordingExample.kt)
 
 ## ⚠️ Common Mistakes
 
 ### ❌ Wrong sample rate
+
 ```kotlin
 AudioRecord(..., 16000, ...)  // WRONG! Must be 48000
 ```
 
 ### ❌ Not using coroutines for processChunk
+
 ```kotlin
 denoiser.processChunk(audio)  // WRONG! Missing suspend context
 ```
+
 ✅ **Correct:**
+
 ```kotlin
 lifecycleScope.launch {
     denoiser.processChunk(audio)
@@ -198,10 +200,13 @@ lifecycleScope.launch {
 ```
 
 ### ❌ Forgetting to flush
+
 ```kotlin
 denoiser.destroy()  // WRONG! May lose buffered audio
 ```
+
 ✅ **Correct:**
+
 ```kotlin
 denoiser.flush()
 delay(50)
@@ -209,10 +214,13 @@ denoiser.destroy()
 ```
 
 ### ❌ Using wrong buffer type
+
 ```kotlin
 val buffer = ByteArray(1024)  // WRONG! Denoiser needs ShortArray
 ```
+
 ✅ **Correct:**
+
 ```kotlin
 val buffer = ShortArray(480)  // ShortArray for 16-bit PCM
 ```
@@ -220,6 +228,7 @@ val buffer = ShortArray(480)  // ShortArray for 16-bit PCM
 ## 🧪 Testing
 
 ### Check if 48kHz is supported
+
 ```kotlin
 val bufferSize = AudioRecord.getMinBufferSize(
     48000,
@@ -232,6 +241,7 @@ if (bufferSize == AudioRecord.ERROR_BAD_VALUE) {
 ```
 
 ### Monitor VAD
+
 ```kotlin
 .onProcessedAudio { audio, result ->
     Log.d("VAD", "Probability: ${result.vadProbability}, " +
@@ -240,6 +250,7 @@ if (bufferSize == AudioRecord.ERROR_BAD_VALUE) {
 ```
 
 ### Save to file for testing
+
 ```kotlin
 val file = File(context.cacheDir, "denoised.pcm")
 val fos = FileOutputStream(file)
@@ -260,13 +271,13 @@ denoiser.onProcessedAudio { audio, _ ->
 
 ## 🆘 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| No callback firing | Check you're using `lifecycleScope.launch` for `processChunk()` |
-| Distorted audio | Verify 48kHz sample rate, check buffer isn't being modified |
-| High latency | Use smaller read buffers (480-960 samples) |
-| Memory leak | Always call `destroy()` when done |
-| "State check failed" | Denoiser was already destroyed, don't reuse |
+| Issue                | Solution                                                        |
+| -------------------- | --------------------------------------------------------------- |
+| No callback firing   | Check you're using `lifecycleScope.launch` for `processChunk()` |
+| Distorted audio      | Verify 48kHz sample rate, check buffer isn't being modified     |
+| High latency         | Use smaller read buffers (480-960 samples)                      |
+| Memory leak          | Always call `destroy()` when done                               |
+| "State check failed" | Denoiser was already destroyed, don't reuse                     |
 
 ---
 
