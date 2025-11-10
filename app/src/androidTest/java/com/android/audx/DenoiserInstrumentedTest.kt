@@ -277,7 +277,7 @@ class DenoiserInstrumentedTest {
             }
             .build()
 
-        // Process first 3 frames to allow RNNoise to warm up
+        // Process first 3 frames to allow denoiser to warm up
         for (i in 0 until 3) {
             val start = i * frameSize
             val end = start + frameSize

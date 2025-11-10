@@ -19,13 +19,13 @@ import kotlin.math.abs
 import kotlin.math.max
 
 /**
- * Example: Real-time audio recording with RNNoise denoising
+ * Example: Real-time audio recording with denoising
  *
  * This demonstrates how to integrate the Denoiser with real-time audio recording
  * for 48kHz 16-bit PCM audio processing.
  *
  * Key differences from standard recording:
- * - Sample rate: 48kHz (required by RNNoise)
+ * - Sample rate: 48kHz (required by denoiser)
  * - Processes audio through Denoiser before sending
  * - Provides VAD (Voice Activity Detection) feedback
  */
@@ -34,8 +34,8 @@ class DenoiserAudioRecordingExample {
     companion object {
         private const val TAG = "DenoiserAudioRecording"
 
-        // RNNoise requirements: 48kHz, 16-bit PCM, mono
-        private const val SAMPLE_RATE = 48000  // Changed from 16000 to 48000 for RNNoise
+        // Denoiser requirements: 48kHz, 16-bit PCM, mono
+        private const val SAMPLE_RATE = 48000  // Must be 48kHz for audio denoising
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
         private const val BUFFER_SIZE_FACTOR = 4
@@ -84,7 +84,7 @@ class DenoiserAudioRecordingExample {
     }
 
     /**
-     * Initialize the RNNoise denoiser
+     * Initialize the audio denoiser
      */
     private fun initializeDenoiser() {
         denoiser = Denoiser.Builder()

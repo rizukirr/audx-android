@@ -27,7 +27,7 @@ data class DenoiserResult(
 typealias ProcessedAudioCallback = (denoisedAudio: ShortArray, result: DenoiserResult) -> Unit
 
 /**
- * RNNoise-based audio denoiser for real-time processing
+ * Audio denoiser for real-time processing
  *
  * REQUIREMENTS:
  * - Sample rate: 48kHz (48000 Hz)
@@ -52,13 +52,13 @@ class Denoiser private constructor(
         private const val TAG = "Denoiser"
 
         /**
-         * RNNoise frame size: 480 samples per channel at 48kHz (10ms)
+         * Frame size: 480 samples per channel at 48kHz (10ms)
          * Total samples per frame = FRAME_SIZE * numChannels
          */
         const val FRAME_SIZE = 480
 
         /**
-         * Required sample rate for RNNoise processing
+         * Required sample rate for audio processing
          */
         const val SAMPLE_RATE = 48000
 

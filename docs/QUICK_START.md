@@ -1,4 +1,4 @@
-# RNNoise Denoiser - Quick Start Guide
+# Audio Denoiser - Quick Start Guide
 
 ## 📋 Requirements Checklist
 
@@ -166,7 +166,7 @@ processChunk(ShortArray)
     ↓
 [Internal buffering to 480-sample frames]
     ↓
-RNNoise Processing
+Audio Processing
     ↓
 onProcessedAudio callback
     ↓
@@ -175,7 +175,8 @@ Denoised audio + VAD result
 
 ## 🎬 Example Files
 
-[Example Usage](https://github.com/rizukirr/audx-android/blob/main/app/src/main/java/com/android/audx/examples/DenoiserAudioRecordingExample.kt)
+- [Simple Example](https://github.com/rizukirr/audx-android/blob/main/examples/SimpleDenoiserExample.kt)
+- [AudioRecord Integration Example](https://github.com/rizukirr/audx-android/blob/main/examples/DenoiserAudioRecordingExample.kt)
 
 ## ⚠️ Common Mistakes
 
@@ -265,7 +266,6 @@ denoiser.onProcessedAudio { audio, _ ->
 
 ## 📚 Additional Resources
 
-- **RNNoise paper**: https://jmvalin.ca/demo/rnnoise/
 - **Frame size explanation**: 480 samples = 10ms at 48kHz
 - **VAD**: Voice Activity Detection (0.0 = silence, 1.0 = speech)
 

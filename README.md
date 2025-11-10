@@ -5,7 +5,7 @@
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 [![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://android-arsenal.com/api?level=24)
 
-An Android library for real-time audio denoising powered by RNNoise, with built-in Voice Activity Detection (VAD).
+An Android library for real-time audio denoising with built-in Voice Activity Detection (VAD) base on Recurrent Neural Networks. The core of this project is written in C that you can found in this [link](https://github.com/rizukirr/audx-realtime)
 
 ## Quick Start
 
@@ -54,7 +54,7 @@ The documentation includes:
 
 ## Features
 
-- ✅ Real-time audio denoising using RNNoise
+- ✅ Real-time audio denoising
 - ✅ Built-in Voice Activity Detection (VAD)
 - ✅ Mono and stereo support
 - ✅ Automatic internal buffering
@@ -92,4 +92,4 @@ See [LICENSE](LICENSE) file for details.
 
 ## Credits
 
-Built with [RNNoise](https://jmvalin.ca/demo/rnnoise/) by Jean-Marc Valin.
+Built with [audx-realtime](https://github.com/rizukirr/audx-realtime) audio processing library.

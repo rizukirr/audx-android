@@ -56,6 +56,9 @@ android {
         viewBinding = false  // Not needed for library without UI
     }
 
+    // Exclude examples from the published library
+    // (Examples are now in root /examples directory, so they won't be included anyway)
+
     // Enable publishing with sources and javadoc
     publishing {
         singleVariant("release") {
@@ -94,7 +97,7 @@ afterEvaluate {
                 // Optional: Add POM metadata for better documentation
                 pom {
                     name.set("Audx")
-                    description.set("Real-time audio denoising library for Android powered by RNNoise with ARM NEON optimizations")
+                    description.set("Real-time audio denoising library for Android with ARM NEON optimizations")
                     url.set("https://github.com/rizukirr/AudxAndroid")
 
                     licenses {
