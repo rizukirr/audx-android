@@ -14,7 +14,7 @@ Real-time audio denoising library for Android with Voice Activity Detection (VAD
 - ✅ Audio format validation with clear error messages
 - ✅ Mono audio processing optimized for performance
 - ✅ Automatic internal buffering for variable chunk sizes
-- ✅ Kotlin coroutines support
+- ✅ A richer statistics API for real-time monitoring
 - ✅ Custom model support for specialized environments
 - ✅ ARM NEON & x86 SIMD optimizations
 
