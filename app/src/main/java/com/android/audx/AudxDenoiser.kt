@@ -22,6 +22,41 @@ data class DenoiserResult(
 )
 
 /**
+ * Comprehensive statistics for denoiser performance and behavior
+ *
+ * Statistics accumulate over the lifetime of the denoiser instance unless
+ * explicitly reset using resetStats(). Use getStats() to retrieve current values.
+ *
+ * @property frameProcessed Total number of frames processed (each frame = 480 samples = 10ms)
+ * @property speechDetectedPercent Percentage of frames classified as speech (0-100)
+ * @property vadScoreAvg Average VAD (Voice Activity Detection) score across all frames (0.0-1.0)
+ * @property vadScoreMin Minimum VAD score observed (0.0-1.0)
+ * @property vadScoreMax Maximum VAD score observed (0.0-1.0)
+ * @property processingTimeTotal Total processing time in milliseconds for all frames
+ * @property processingTimeAvg Average processing time per frame in milliseconds
+ * @property processingTimeLast Processing time for the most recent frame in milliseconds
+ */
+data class DenoiserStats(
+    val frameProcessed: Int,
+    val speechDetectedPercent: Float,
+    val vadScoreAvg: Float,
+    val vadScoreMin: Float,
+    val vadScoreMax: Float,
+    val processingTimeTotal: Float,
+    val processingTimeAvg: Float,
+    val processingTimeLast: Float
+) {
+    override fun toString(): String {
+        return "DenoiserStats(frames=$frameProcessed, speech=${String.format("%.1f", speechDetectedPercent)}%, " +
+                "vad=[avg=${String.format("%.3f", vadScoreAvg)}, min=${String.format("%.3f", vadScoreMin)}, " +
+                "max=${String.format("%.3f", vadScoreMax)}], " +
+                "time=[total=${String.format("%.2f", processingTimeTotal)}ms, " +
+                "avg=${String.format("%.3f", processingTimeAvg)}ms, " +
+                "last=${String.format("%.3f", processingTimeLast)}ms])"
+    }
+}
+
+/**
  * Callback for receiving processed audio chunks in streaming mode
  */
 typealias ProcessedAudioCallback = (denoisedAudio: ShortArray, result: DenoiserResult) -> Unit
@@ -65,7 +100,6 @@ class AudxDenoiser private constructor(
         @JvmStatic
         val SAMPLE_RATE: Int
             get() = getSampleRateNative()
-
         /**
          * Number of audio channels supported (from native: AUDX_CHANNELS_MONO)
          * Always 1 for mono audio
@@ -356,6 +390,46 @@ class AudxDenoiser private constructor(
     }
 
     /**
+     * Get current denoiser statistics
+     *
+     * Returns comprehensive statistics including frame counts, speech detection rates,
+     * VAD score statistics, and processing time metrics. Statistics accumulate over
+     * the lifetime of this denoiser instance unless explicitly reset with resetStats().
+     *
+     * Thread-safe: Can be called from any thread.
+     *
+     * @return Current statistics snapshot, or null if stats retrieval fails
+     * @throws IllegalStateException if denoiser has been destroyed
+     */
+    fun getStats(): DenoiserStats? {
+        check(nativeHandle != 0L) { "Denoiser has been destroyed" }
+        return getStatsNative(nativeHandle)
+    }
+
+    /**
+     * Reset all statistics counters to zero
+     *
+     * Clears all accumulated statistics including frame counts, speech detection rates,
+     * VAD scores, and processing times. Use this to measure statistics for specific
+     * recording sessions or time periods.
+     *
+     * Example usage:
+     * ```
+     * denoiser.resetStats()  // Start fresh
+     * // ... process audio ...
+     * val stats = denoiser.getStats()  // Get stats for this session
+     * ```
+     *
+     * Thread-safe: Can be called from any thread.
+     *
+     * @throws IllegalStateException if denoiser has been destroyed
+     */
+    fun resetStats() {
+        check(nativeHandle != 0L) { "Denoiser has been destroyed" }
+        resetStatsNative(nativeHandle)
+    }
+
+    /**
      * Release resources
      */
     override fun close() {
@@ -392,4 +466,7 @@ class AudxDenoiser private constructor(
         input: ShortArray,
         output: ShortArray
     ): DenoiserResult?
+
+    private external fun getStatsNative(handle: Long): DenoiserStats?
+    private external fun resetStatsNative(handle: Long)
 }

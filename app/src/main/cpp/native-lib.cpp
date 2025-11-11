@@ -161,3 +161,81 @@ Java_com_android_audx_AudxDenoiser_getFrameSizeNative(
         jclass /* clazz */) {
     return AUDX_FRAME_SIZE;
 }
+
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_android_audx_AudxDenoiser_getStatsNative(
+        JNIEnv *env,
+        jobject /* this */,
+        jlong handle) {
+
+    auto *denoiser = reinterpret_cast<Denoiser *>(handle);
+    if (denoiser == nullptr) {
+        LOGE("Invalid denoiser handle");
+        return nullptr;
+    }
+
+    struct DenoiserStats stats{};
+    int ret = get_denoiser_stats(denoiser, &stats);
+
+    if (ret != AUDX_SUCCESS) {
+        LOGE("Failed to get denoiser stats: %d", ret);
+        return nullptr;
+    }
+
+    // Find Kotlin class
+    jclass statsClass = env->FindClass("com/android/audx/DenoiserStats");
+    if (statsClass == nullptr) {
+        LOGE("Cannot find DenoiserStats class");
+        return nullptr;
+    }
+
+    // Find constructor: (IFFFFFFF)V — int + 7 floats
+    jmethodID ctor = env->GetMethodID(statsClass, "<init>", "(IFFFFFFF)V");
+    if (ctor == nullptr) {
+        LOGE("Cannot find DenoiserStats constructor");
+        return nullptr;
+    }
+
+    // Create and return Kotlin object
+    jobject statsObj = env->NewObject(
+            statsClass,
+            ctor,
+            stats.frame_processed,
+            stats.speech_detected,
+            stats.vscores_avg,
+            stats.vscores_min,
+            stats.vscores_max,
+            stats.ptime_total,
+            stats.ptime_avg,
+            stats.ptime_last
+    );
+
+    LOGI("Stats retrieved: frames=%d, speech=%.1f%%, vad_avg=%.3f, ptime_avg=%.3f ms",
+         stats.frame_processed, stats.speech_detected, stats.vscores_avg, stats.ptime_avg);
+
+    return statsObj;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_android_audx_AudxDenoiser_resetStatsNative(
+        JNIEnv *env,
+        jobject /* this */,
+        jlong handle) {
+
+    auto *denoiser = reinterpret_cast<Denoiser *>(handle);
+    if (denoiser == nullptr) {
+        LOGE("Invalid denoiser handle");
+        return;
+    }
+
+    // Manually reset all statistics fields
+    denoiser->frames_processed = 0;
+    denoiser->speech_frames = 0;
+    denoiser->total_vad_score = 0.0f;
+    denoiser->min_vad_score = 1.0f;  // Reset to max so first frame sets new min
+    denoiser->max_vad_score = 0.0f;  // Reset to min so first frame sets new max
+    denoiser->total_processing_time = 0.0;
+    denoiser->last_frame_time = 0.0;
+
+    LOGI("Denoiser statistics reset");
+}

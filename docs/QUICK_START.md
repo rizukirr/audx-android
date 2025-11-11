@@ -4,16 +4,15 @@
 
 - **Sample Rate**: 48kHz (48000 Hz)
 - **Audio Format**: 16-bit signed PCM
-- **Frame Size**: 480 samples/channel (10ms)
-- **Channels**: 1 (mono) or 2 (stereo, interleaved)
+- **Frame Size**: 480 samples (10ms)
+- **Channels**: Mono only (1 channel)
 
 ## Basic Usage (3 Steps)
 
 ### Step 1: Create Denoiser
 
 ```kotlin
-val denoiser = Denoiser.Builder()
-    .numChannels(1)              // 1 = mono, 2 = stereo
+val denoiser = AudxDenoiser.Builder()
     .vadThreshold(0.5f)          // Speech detection threshold (0.0-1.0)
     .onProcessedAudio { audio, result ->
         // Handle denoised audio (called every 10ms)
@@ -45,15 +44,14 @@ denoiser.destroy()  // Release resources
 
 ```kotlin
 class MyActivity : AppCompatActivity() {
-    private lateinit var denoiser: Denoiser
+    private lateinit var denoiser: AudxDenoiser
     private var audioRecord: AudioRecord? = null
     private var isRecording = false
 
     @SuppressLint("MissingPermission")
     fun startRecording() {
         // 1. Create denoiser
-        denoiser = Denoiser.Builder()
-            .numChannels(1)
+        denoiser = AudxDenoiser.Builder()
             .vadThreshold(0.5f)
             .onProcessedAudio { denoisedAudio, result ->
                 // Handle 10ms of denoised audio
@@ -113,12 +111,12 @@ class MyActivity : AppCompatActivity() {
 ## Key Constants
 
 ```kotlin
-Denoiser.SAMPLE_RATE          // 48000
-Denoiser.FRAME_SIZE           // 480 samples/channel
-Denoiser.getFrameDurationMs() // 10ms
-Denoiser.getFrameSizeInSamples(1)  // 480 (mono)
-Denoiser.getFrameSizeInSamples(2)  // 960 (stereo)
-Denoiser.getRecommendedBufferSize(1, 10)  // Buffer for 10ms mono
+AudxDenoiser.SAMPLE_RATE          // 48000 Hz
+AudxDenoiser.CHANNELS             // 1 (mono only)
+AudxDenoiser.BIT_DEPTH            // 16 (16-bit PCM)
+AudxDenoiser.FRAME_SIZE           // 480 samples
+AudxDenoiser.getFrameDurationMs() // 10ms
+AudxDenoiser.getRecommendedBufferSize(10)  // Buffer size in bytes for 10ms
 ```
 
 ## Configuration Options
@@ -135,7 +133,7 @@ Denoiser.getRecommendedBufferSize(1, 10)  // Buffer for 10ms mono
 ### Custom Model
 
 ```kotlin
-.modelPreset(Denoiser.ModelPreset.CUSTOM)
+.modelPreset(AudxDenoiser.ModelPreset.CUSTOM)
 .modelPath("/path/to/custom.rnnn")
 ```
 
@@ -151,7 +149,7 @@ Denoiser.getRecommendedBufferSize(1, 10)  // Buffer for 10ms mono
 val audioRecord = AudioRecord(
     MediaRecorder.AudioSource.VOICE_RECOGNITION,  // Best for speech
     48000,                                         // Must be 48kHz
-    AudioFormat.CHANNEL_IN_MONO,                   // Mono or STEREO
+    AudioFormat.CHANNEL_IN_MONO,                   // Mono only
     AudioFormat.ENCODING_PCM_16BIT,                // Must be 16-bit
     bufferSize
 )
@@ -175,8 +173,7 @@ Denoised audio + VAD result
 
 ## Example Files
 
-- [Simple Example](https://github.com/rizukirr/audx-android/blob/main/examples/SimpleDenoiserExample.kt)
-- [AudioRecord Integration Example](https://github.com/rizukirr/audx-android/blob/main/examples/DenoiserAudioRecordingExample.kt)
+- [Full Example Application](https://github.com/rizukirr/audx-android/tree/main/examples/audx_example) - Complete Android app demonstrating real-time audio denoising with AudioRecord integration
 
 ## Common Mistakes
 
@@ -281,4 +278,4 @@ denoiser.onProcessedAudio { audio, _ ->
 
 ---
 
-**Ready to start?** Copy `SimpleDenoiserExample.kt` and run it! 🚀
+**Ready to start?** Check out the [full example application](https://github.com/rizukirr/audx-android/tree/main/examples/audx_example) to see it in action! 🚀

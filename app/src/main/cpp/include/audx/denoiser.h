@@ -15,73 +15,269 @@ typedef struct RNNModel RNNModel;
 }
 #endif
 
-/* Audio format constants */
+/**
+ * @def AUDX_SAMPLE_RATE_48KHZ
+ * @brief Standard audio sample rate used by the denoiser (48 kHz).
+ *
+ * RNNoise and most real-time speech enhancement models are designed to
+ * operate at 48,000 samples per second.
+ */
 #define AUDX_SAMPLE_RATE_48KHZ 48000
+
+/**
+ * @def AUDX_CHANNELS_MONO
+ * @brief Number of audio channels (mono = 1).
+ *
+ * The denoiser processes single-channel (mono) audio input.
+ */
 #define AUDX_CHANNELS_MONO 1
+
+/**
+ * @def AUDX_BIT_DEPTH_16
+ * @brief Bit depth of the PCM audio format (16 bits per sample).
+ *
+ * The audio is represented as signed 16-bit integers (PCM_S16LE).
+ */
 #define AUDX_BIT_DEPTH_16 16
+
+/**
+ * @def AUDX_FRAME_SIZE
+ * @brief Frame size in samples for one 10 ms chunk at 48 kHz.
+ *
+ * RNNoise operates on 480-sample frames (10 ms @ 48 kHz).
+ */
 #define AUDX_FRAME_SIZE 480
 
-/* Error codes */
+/**
+ * @def AUDX_SUCCESS
+ * @brief Operation completed successfully.
+ */
 #define AUDX_SUCCESS 0
+
+/**
+ * @def AUDX_ERROR_INVALID
+ * @brief Invalid argument or unsupported configuration.
+ */
 #define AUDX_ERROR_INVALID -1
+
+/**
+ * @def AUDX_ERROR_MEMORY
+ * @brief Memory allocation failure.
+ */
 #define AUDX_ERROR_MEMORY -2
+
+/**
+ * @def AUDX_ERROR_MODEL
+ * @brief Model loading or initialization failure.
+ */
 #define AUDX_ERROR_MODEL -3
-#define AUDX_ERROR_FORMAT -4
 
+/**
+ * @struct DenoiserConfig
+ * @brief Configuration parameters for initializing and controlling the
+ * denoiser.
+ *
+ * This structure defines model selection, file paths, and VAD (Voice Activity
+ * Detection) parameters used during denoiser initialization.
+ */
 struct DenoiserConfig {
-  enum ModelPreset model_preset; // Which model to use
-  const char *model_path;        // Path to custom model, can be NULL
-  float vad_threshold;           // 0.0-1.0 default 0.5
-  bool enable_vad_output;        // Enable VAD in results
+  /**
+   * Preset model selection.
+   *
+   * Defines which built-in RNNoise model to use for denoising.
+   * For example: MODEL_PRESET_DEFAULT, MODEL_PRESET_LIGHT, etc.
+   */
+  enum ModelPreset model_preset;
+
+  /**
+   * Optional path to a custom model file (.rnnn).
+   *
+   * If provided, this model will override the preset model.
+   * Can be NULL to use the default built-in model.
+   */
+  const char *model_path;
+
+  /**
+   * Voice Activity Detection (VAD) threshold.
+   *
+   * Range: 0.0–1.0 (default: 0.5)
+   *
+   * Frames with VAD scores above this threshold are classified as speech.
+   * Lower values make speech detection more sensitive (detects more speech),
+   * while higher values make it stricter.
+   */
+  float vad_threshold;
+
+  /**
+   * Enable or disable VAD results in the denoiser output.
+   *
+   * If true, the DenoiserResult struct will include valid VAD scores and
+   * speech flags. If false, VAD is disabled and results are not computed.
+   */
+  bool enable_vad_output;
 };
 
+/**
+ * @struct DenoiserResult
+ * @brief Holds per-frame output data from the denoiser.
+ *
+ * This structure contains information about the processed frame,
+ * including VAD probability, speech detection flag, and frame size.
+ */
 struct DenoiserResult {
-  float vad_probability; // result of vad probability 0.0-1.0
-  bool is_speech;        // above threshold?
-  int samples_processed; // should be 480
+  /**
+   * Probability of speech presence in the processed frame.
+   *
+   * Range: 0.0–1.0, where higher values indicate stronger confidence
+   * that the frame contains speech.
+   */
+  float vad_probability;
+
+  /**
+   * Speech detection flag based on the configured VAD threshold.
+   *
+   * True if vad_probability >= vad_threshold, otherwise false.
+   */
+  bool is_speech;
+
+  /**
+   * Number of audio samples processed in this frame.
+   *
+   * For RNNoise, this is typically 480 samples (10 ms at 48 kHz).
+   */
+  int samples_processed;
 };
 
+/**
+ * @struct DenoiserStats
+ * @brief Holds runtime statistics and performance metrics of the denoiser.
+ *
+ * This structure is filled by get_denoiser_stats() and provides
+ * information about the number of frames processed, speech activity
+ * detection (VAD) results, and processing performance.
+ */
 struct DenoiserStats {
+  /** Total number of audio frames processed since initialization */
   int frame_processed;
+
+  /** Percentage of frames where speech was detected (0.0–100.0) */
   float speech_detected;
+
+  /** Average VAD (Voice Activity Detection) score across all frames */
   float vscores_avg;
+
+  /** Minimum VAD score observed */
   float vscores_min;
+
+  /** Maximum VAD score observed */
   float vscores_max;
+
+  /** Total processing time (in milliseconds) accumulated for all frames */
   float ptime_total;
+
+  /** Average processing time per frame (in milliseconds) */
   float ptime_avg;
+
+  /** Processing time (in milliseconds) for the last processed frame */
   float ptime_last;
 };
 
 /**
- * @brief Optimized mono denoiser context (no worker threads)
+ * @struct Denoiser
+ * @brief Optimized single-channel (mono) denoiser context.
+ *
+ * This version of the denoiser is designed for efficient, single-threaded
+ * operation without worker threads. It maintains state for the RNNoise-based
+ * denoiser, configuration parameters, runtime statistics, and error handling.
  */
 struct Denoiser {
-  /* Configuration */
-  int num_channels; // Always 1 in optimized version
+
+  /**
+   * Number of audio channels.
+   *
+   * Always 1 in this optimized mono implementation.
+   */
+  int num_channels;
+
+  /**
+   * Voice Activity Detection (VAD) threshold.
+   *
+   * Range: 0.0–1.0 (default: 0.5)
+   *
+   * Determines whether a frame is classified as speech based on the
+   * probability score returned by the VAD model.
+   */
   float vad_threshold;
+
+  /**
+   * Enable or disable VAD output in processing results.
+   *
+   * If true, the denoiser computes and reports VAD probability and
+   * speech detection flags in DenoiserResult.
+   */
   bool enable_vad_output;
 
-  /* RNNoise state (single channel) */
+  /**
+   * Internal RNNoise state for a single channel.
+   *
+   * This object maintains the model’s memory across frames.
+   */
   DenoiseState *denoiser_state;
 
-  /* Loaded model (NULL for embedded) */
+  /**
+   * Pointer to the loaded RNNoise model.
+   *
+   * Can be NULL if using the embedded default model.
+   */
   RNNModel *model;
 
-  /* Single processing buffer (frame-sized float array) */
-  float *processing_buffer; // [FRAME_SIZE]
+  /**
+   * Temporary buffer for one frame of floating-point audio samples.
+   *
+   * Length: FRAME_SIZE (e.g., 480 samples for 10 ms @ 48 kHz)
+   */
+  float *processing_buffer;
 
-  /* Statistics */
+  /**
+   * Total number of frames processed since initialization.
+   */
   uint64_t frames_processed;
+
+  /**
+   * Number of frames classified as speech (based on VAD threshold).
+   */
   uint64_t speech_frames;
+
+  /**
+   * Accumulated sum of VAD scores (used to compute averages).
+   */
   float total_vad_score;
+
+  /**
+   * Minimum VAD score observed during processing.
+   */
   float min_vad_score;
+
+  /**
+   * Maximum VAD score observed during processing.
+   */
   float max_vad_score;
 
-  /* Timing info */
+  /**
+   * Total processing time across all frames (in milliseconds).
+   */
   double total_processing_time;
+
+  /**
+   * Processing time for the last processed frame (in milliseconds).
+   */
   double last_frame_time;
 
-  /* Error handling */
+  /**
+   * Internal error message buffer (null-terminated string).
+   *
+   * Used to store the most recent error or diagnostic message.
+   */
   char error_buffer[256];
 };
 
@@ -139,11 +335,23 @@ void denoiser_destroy(struct Denoiser *denoiser);
 const char *get_denoiser_error(struct Denoiser *denoiser);
 
 /**
- * @brief get statistics
+ * @brief Retrieve runtime statistics from the denoiser instance.
  *
- * @param denoiser  Denoiser to track
+ * Populates the provided @ref DenoiserStats structure with metrics
+ * about processed frames, VAD (Voice Activity Detection) scores, and
+ * performance timing information.
  *
- * @return Statistics string (do not free)
+ * @param denoiser Pointer to an initialized Denoiser instance.
+ * @param stats    Pointer to a DenoiserStats struct to be filled with results.
+ *
+ * @return
+ * - AUDX_SUCCESS (0) on success
+ * - AUDX_ERROR_INVALID (-1) if @p denoiser or @p stats is NULL
+ *
+ * @note This function does not allocate memory. The @p stats pointer must
+ *       point to valid writable memory provided by the caller.
+ *
+ * @see DenoiserStats
  */
 int get_denoiser_stats(struct Denoiser *denoiser, struct DenoiserStats *stats);
 
