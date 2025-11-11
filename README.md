@@ -1,4 +1,4 @@
-# Audx - Android Audio Denoising Library
+# Audx - Android Realtime Audio Denoising Library
 
 [![](https://jitpack.io/v/rizukirr/audx-android.svg)](https://jitpack.io/#rizukirr/audx-android)
 [![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/rizukirr/audx-android/releases)
