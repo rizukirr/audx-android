@@ -87,3 +87,12 @@ See [LICENSE](LICENSE) file for details.
 ## Credits
 
 Built with [audx-realtime](https://github.com/rizukirr/audx-realtime) - Audio denoising library based on [Xiph.Org RNNoise](https://github.com/xiph/rnnoise).
+
+---
+
+💖 **Support This Project**
+
+If you find this project helpful, consider supporting its development:  
+☕ [Buy Me a Coffee](https://ko-fi.com/rizukirr)
+
+Made with ❤️ by [Your Name](https://github.com/rizukirr)
