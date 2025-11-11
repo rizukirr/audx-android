@@ -48,8 +48,6 @@ Java_com_android_audx_AudxDenoiser_createNative(
         return 0;
     }
 
-    LOGI("Denoiser created successfully (channels: %d, model_preset: %d, vad_threshold: %.2f, enable_vad: %d)",
-         1, modelPreset, vadThreshold, enableVadOutput);
     return reinterpret_cast<jlong>(denoiser);
 }
 
@@ -85,18 +83,8 @@ Java_com_android_audx_AudxDenoiser_processNative(
     jshort *input = env->GetShortArrayElements(inputArray, nullptr);
     jshort *output = env->GetShortArrayElements(outputArray, nullptr);
 
-    // Debug: Log first few input samples
-    LOGI("First 5 input samples: %d, %d, %d, %d, %d",
-         input[0], input[1], input[2], input[3], input[4]);
-
     struct DenoiserResult result{};
     int ret = denoiser_process(denoiser, input, output, &result);
-
-    // Debug: Log first few output samples
-    LOGI("First 5 output samples: %d, %d, %d, %d, %d",
-         output[0], output[1], output[2], output[3], output[4]);
-    LOGI("Return code: %d, VAD: %.3f, samples: %d",
-         ret, result.vad_probability, result.samples_processed);
 
     // Release arrays
     env->ReleaseShortArrayElements(inputArray, input, JNI_ABORT);
@@ -209,9 +197,6 @@ Java_com_android_audx_AudxDenoiser_getStatsNative(
             stats.ptime_avg,
             stats.ptime_last
     );
-
-    LOGI("Stats retrieved: frames=%d, speech=%.1f%%, vad_avg=%.3f, ptime_avg=%.3f ms",
-         stats.frame_processed, stats.speech_detected, stats.vscores_avg, stats.ptime_avg);
 
     return statsObj;
 }
