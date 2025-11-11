@@ -68,7 +68,7 @@ Add dependency in `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr:audx-android:v1.0.0-dev01")
+    implementation("com.github.rizukirr:audx-android:1.0.0")
 }
 ```
 
