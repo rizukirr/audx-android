@@ -6,69 +6,68 @@ import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.util.Log
 import com.android.audx.AudxDenoiser
-import com.android.audx.AudxValidator
-import com.android.audx.ValidationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
-import kotlin.coroutines.coroutineContext
 
 /**
- * Audio recorder that uses AudxDenoiser constants for all audio configuration
+ * Audio recorder that captures audio at 16kHz for use with AudxDenoiser's resampling feature
  *
- * This class demonstrates best practices for using the audx-android library:
- * - Uses AudxDenoiser.SAMPLE_RATE (48000 Hz)
+ * This class demonstrates using a non-48kHz sample rate with audx-android:
+ * - Uses 16kHz sample rate (will be resampled by AudxDenoiser to 48kHz)
  * - Uses AudxDenoiser.CHANNELS (1 for mono)
  * - Uses AudxDenoiser.BIT_DEPTH (16-bit)
- * - Uses AudxDenoiser.FRAME_SIZE (480 samples)
- * - Uses AudxDenoiser.getRecommendedBufferSize() for buffer sizing
- * - Uses AudxValidator for format validation
+ * - Calculates appropriate buffer sizes for 16kHz
+ * - AudxDenoiser will handle automatic resampling from 16kHz to 48kHz
  */
 class AudioRecorder {
 
     companion object {
         private const val TAG = "AudioRecorder"
+
+        /**
+         * 16kHz, in this case AudxDenoiser will auto resampler to 48kHz as requirements
+         * but we need to initialize AudxDenoiser with .inputSampleRate(16000) to
+         * acknowledge AudxDenoiser to resampling from 16kHz
+         * */
+        const val SAMPLE_RATE = 16000 // 16kHz - will be resampled by AudxDenoiser
+
+        /**
+         * AudxDenoiser require 10ms chunk so 16000 sample/sec * 0.01 = 160 samples
+         */
+        const val FRAME_SIZE = 160
     }
 
     private var audioRecord: AudioRecord? = null
 
     /**
-     * Initialize AudioRecord with AudxDenoiser constants
+     * Initialize AudioRecord with 16kHz sample rate
      *
-     * This ensures the recording format matches exactly what AudxDenoiser expects.
+     * Records at 16kHz, which will be automatically resampled by AudxDenoiser to 48kHz.
      */
     @SuppressLint("MissingPermission")
     fun initialize(): Result<Unit> {
         return try {
-            // Validate audio format before creating AudioRecord
-            val validationResult = AudxValidator.validateFormat(
-                sampleRate = AudxDenoiser.SAMPLE_RATE,
-                channels = AudxDenoiser.CHANNELS,
-                bitDepth = AudxDenoiser.BIT_DEPTH
-            )
-
-            if (validationResult is ValidationResult.Error) {
-                return Result.failure(IllegalStateException("Audio format validation failed: ${validationResult.message}"))
-            }
-
-            // Calculate buffer size using AudxDenoiser utility
-            // Using 40ms buffer (4 frames) for stable recording and prevent underruns
-            val bufferSize = AudxDenoiser.getRecommendedBufferSize(40)
+            // Calculate buffer size for 16kHz
+            // Using 40ms buffer for stable recording and prevent underruns
+            // At 16kHz: 40ms = 16000 samples/sec * 0.04 sec = 640 samples
+            // Buffer size in bytes = samples * 2 (16-bit = 2 bytes per sample)
+            val bufferSizeInSamples = FRAME_SIZE * 4 // 640 samples at 16kHz
+            val bufferSize = bufferSizeInSamples * 2 // Convert to bytes
 
             Log.i(TAG, "Initializing AudioRecord with:")
-            Log.i(TAG, "  Sample Rate: ${AudxDenoiser.SAMPLE_RATE} Hz")
+            Log.i(TAG, "  Sample Rate: $SAMPLE_RATE Hz (will be resampled to 48kHz)")
             Log.i(TAG, "  Channels: ${AudxDenoiser.CHANNELS} (Mono)")
             Log.i(TAG, "  Bit Depth: ${AudxDenoiser.BIT_DEPTH}-bit PCM")
-            Log.i(TAG, "  Frame Size: ${AudxDenoiser.FRAME_SIZE} samples")
-            Log.i(TAG, "  Frame Duration: ${AudxDenoiser.getFrameDurationMs()}ms")
-            Log.i(TAG, "  Buffer Size: $bufferSize bytes")
+            Log.i(TAG, "  Buffer Size: $bufferSize bytes ($bufferSizeInSamples samples)")
+            Log.i(TAG, "  Note: AudxDenoiser will resample from 16kHz to 48kHz")
 
             audioRecord = AudioRecord(
                 MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                AudxDenoiser.SAMPLE_RATE,
+                SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 bufferSize
@@ -88,35 +87,28 @@ class AudioRecorder {
     /**
      * Start recording and emit audio chunks as Flow
      *
-     * Uses AudxDenoiser.FRAME_SIZE for buffer sizing to align with frame processing.
-     * Each emitted chunk will be approximately one or two frames.
+     * Captures audio at 16kHz in chunks suitable for processing.
+     * Each chunk will be approximately 20ms of audio (320 samples at 16kHz).
      */
     fun startRecording(): Flow<ShortArray> = flow {
         val record = audioRecord ?: throw IllegalStateException("AudioRecord not initialized")
 
-        // Use frame size for buffer (can read multiple frames at once)
-        // Using 2 frames (960 samples) for efficient reading
-        val bufferSize = AudxDenoiser.FRAME_SIZE * 2
+        // At 16kHz: 20ms = 320 samples
+        // This provides a good balance between latency and efficiency
+        val bufferSize = FRAME_SIZE * 2 // 320 samples
         val buffer = ShortArray(bufferSize)
 
         record.startRecording()
-        Log.i(TAG, "Recording started")
+        Log.i(TAG, "Recording started at $SAMPLE_RATE Hz")
 
         try {
             while (currentCoroutineContext().isActive && record.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
                 val samplesRead = record.read(buffer, 0, buffer.size)
 
                 if (samplesRead > 0) {
-                    // Validate chunk before emitting
+                    // Emit the audio chunk (will be resampled by AudxDenoiser)
                     val chunk = buffer.copyOf(samplesRead)
-                    when (val result = AudxValidator.validateChunk(chunk)) {
-                        is ValidationResult.Success -> {
-                            emit(chunk)
-                        }
-                        is ValidationResult.Error -> {
-                            Log.w(TAG, "Invalid audio chunk: ${result.message}")
-                        }
-                    }
+                    emit(chunk)
                 } else if (samplesRead < 0) {
                     Log.e(TAG, "AudioRecord read error: $samplesRead")
                     break

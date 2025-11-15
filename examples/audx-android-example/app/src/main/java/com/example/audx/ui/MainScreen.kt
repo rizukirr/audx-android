@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.android.audx.AudxDenoiser
 import com.example.audx.MainViewModel
+import com.example.audx.audio.AudioRecorder
 import com.example.audx.domain.RecordingMode
 import com.example.audx.domain.RecordingState
 
@@ -240,7 +241,7 @@ fun AudioFormatCard() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                InfoItem("Sample Rate", "${AudxDenoiser.SAMPLE_RATE} Hz")
+                InfoItem("Sample Rate", "${AudioRecorder.SAMPLE_RATE} Hz")
                 InfoItem("Channels", "${AudxDenoiser.CHANNELS} (Mono)")
             }
 
@@ -249,7 +250,7 @@ fun AudioFormatCard() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 InfoItem("Bit Depth", "${AudxDenoiser.BIT_DEPTH}-bit PCM")
-                InfoItem("Frame Size", "${AudxDenoiser.FRAME_SIZE} samples")
+                InfoItem("Frame Size", "${AudioRecorder.FRAME_SIZE} samples")
             }
 
             InfoItem("Frame Duration", "${AudxDenoiser.getFrameDurationMs()}ms")

@@ -22,53 +22,9 @@ struct ResamplerContext {
     bool needs_resampling;
     int input_frame_samples;
     int output_frame_samples;
+    AudxResampler upsampler;      // Persistent upsampler (input_rate -> 48kHz)
+    AudxResampler downsampler;    // Persistent downsampler (48kHz -> input_rate)
 };
-
-/**
- * Resample an audio frame from input_rate to output_rate
- * Returns 0 on success, negative on error
- */
-static int resample_frame(const int16_t *input, int input_samples,
-                          int16_t *output, const int *output_samples, int input_rate,
-                          int output_rate, int quality) {
-    /* Allocate float buffers for resampling */
-    auto *input_float = (float *) malloc(input_samples * sizeof(float));
-    auto *output_float = (float *) malloc(*output_samples * sizeof(float));
-
-    if (!input_float || !output_float) {
-        free(input_float);
-        free(output_float);
-        return AUDX_RESAMPLER_ERROR_MEMORY;
-    }
-
-    /* Convert input to float */
-    pcm_int16_to_float(input, input_float, input_samples);
-
-    /* Setup resampler state */
-    struct AudxResamplerState state = {
-            .nb_channels = 1,
-            .input_sample_rate = (audx_uint32_t) input_rate,
-            .output_sample_rate = (audx_uint32_t) output_rate,
-            .quality = quality,
-            .input = input_float,
-            .input_len = (audx_uint32_t) input_samples,
-            .output = output_float,
-            .output_len = (audx_uint32_t) *output_samples
-    };
-
-    /* Perform resampling */
-    int ret = audx_resampler(&state);
-
-    if (ret == AUDX_RESAMPLER_SUCCESS) {
-        /* Convert output back to int16 */
-        pcm_float_to_int16(output_float, output, *output_samples);
-    }
-
-    free(input_float);
-    free(output_float);
-
-    return ret;
-}
 
 /**
  * Combined native handle containing both denoiser and resampler context
@@ -85,7 +41,7 @@ Java_com_android_audx_AudxDenoiser_createNative(
         jint modelPreset,
         jstring modelPath,
         jfloat vadThreshold,
-        jboolean enableVadOutput,
+        jboolean statsEnabled,
         jint inputSampleRate,
         jint resampleQuality) {
 
@@ -98,12 +54,12 @@ Java_com_android_audx_AudxDenoiser_createNative(
     }
     config.model_path = model_path_str;
     config.vad_threshold = vadThreshold;
-    config.enable_vad_output = enableVadOutput;
+    config.stats_enabled = statsEnabled;
 
     auto *denoiser = new Denoiser();
 
     int ret = denoiser_create(&config, denoiser);
-    if (ret != AUDX_DENOISER_SUCCESS) {
+    if (ret != AUDX_SUCCESS) {
         delete denoiser;
         return 0;
     }
@@ -121,13 +77,34 @@ Java_com_android_audx_AudxDenoiser_createNative(
     // Create resampler context
     auto *resampler_ctx = new ResamplerContext();
     resampler_ctx->input_rate = inputSampleRate;
-    resampler_ctx->output_rate = AUDX_SAMPLE_RATE_48KHZ;
+    resampler_ctx->output_rate = AUDX_DEFAULT_SAMPLE_RATE;
     resampler_ctx->quality = resampleQuality;
-    resampler_ctx->needs_resampling = (inputSampleRate != AUDX_SAMPLE_RATE_48KHZ);
+    resampler_ctx->needs_resampling = (inputSampleRate != AUDX_DEFAULT_SAMPLE_RATE);
+    resampler_ctx->upsampler = nullptr;
+    resampler_ctx->downsampler = nullptr;
 
     // Calculate frame sizes for 10ms chunks
-    resampler_ctx->input_frame_samples = (inputSampleRate * 10 / 1000) * AUDX_CHANNELS_MONO;
-    resampler_ctx->output_frame_samples = AUDX_FRAME_SIZE * AUDX_CHANNELS_MONO;
+    resampler_ctx->input_frame_samples = get_frame_samples(inputSampleRate);
+    resampler_ctx->output_frame_samples = AUDX_DEFAULT_FRAME_SIZE;
+
+    // Create persistent resamplers if needed
+    if (resampler_ctx->needs_resampling) {
+        int err;
+        resampler_ctx->upsampler = audx_resample_create(
+                1, inputSampleRate, AUDX_DEFAULT_SAMPLE_RATE, resampleQuality, &err);
+        resampler_ctx->downsampler = audx_resample_create(
+                1, AUDX_DEFAULT_SAMPLE_RATE, inputSampleRate, resampleQuality, &err);
+
+        if (!resampler_ctx->upsampler || !resampler_ctx->downsampler) {
+            LOGE("Failed to create persistent resamplers");
+            audx_resample_destroy(resampler_ctx->upsampler);
+            audx_resample_destroy(resampler_ctx->downsampler);
+            delete resampler_ctx;
+            denoiser_destroy(denoiser);
+            delete denoiser;
+            return 0;
+        }
+    }
 
     LOGI("Denoiser created with input_rate=%d, needs_resampling=%d, quality=%d",
          inputSampleRate, resampler_ctx->needs_resampling, resampleQuality);
@@ -153,7 +130,11 @@ Java_com_android_audx_AudxDenoiser_destroyNative(
             delete native_handle->denoiser;
         }
 
-        delete native_handle->resampler_ctx;
+        if (native_handle->resampler_ctx != nullptr) {
+            audx_resample_destroy(native_handle->resampler_ctx->upsampler);
+            audx_resample_destroy(native_handle->resampler_ctx->downsampler);
+            delete native_handle->resampler_ctx;
+        }
 
         delete native_handle;
         LOGI("Denoiser and resampler destroyed");
@@ -200,14 +181,13 @@ Java_com_android_audx_AudxDenoiser_processNative(
             return nullptr;
         }
 
-        // Resample input to 48kHz
-        int resampled_samples = resampler_ctx->output_frame_samples;
-        ret = resample_frame((int16_t *) input, resampler_ctx->input_frame_samples,
-                             resampled_input, &resampled_samples,
-                             resampler_ctx->input_rate, resampler_ctx->output_rate,
-                             resampler_ctx->quality);
+        // Resample input to 48kHz using persistent upsampler
+        audx_uint32_t in_len = resampler_ctx->input_frame_samples;
+        audx_uint32_t out_len = resampler_ctx->output_frame_samples;
+        ret = audx_resample_process(resampler_ctx->upsampler, (int16_t *) input,
+                                    &in_len, resampled_input, &out_len);
 
-        if (ret != AUDX_RESAMPLER_SUCCESS) {
+        if (ret != AUDX_SUCCESS) {
             LOGE("Input resampling failed: %d", ret);
             free(resampled_input);
             free(resampled_output);
@@ -219,7 +199,7 @@ Java_com_android_audx_AudxDenoiser_processNative(
         // Denoise at 48kHz
         ret = denoiser_process(denoiser, resampled_input, resampled_output, &result);
 
-        if (ret != AUDX_DENOISER_SUCCESS) {
+        if (ret != AUDX_SUCCESS) {
             LOGE("Denoiser processing failed: %d", ret);
             free(resampled_input);
             free(resampled_output);
@@ -228,27 +208,29 @@ Java_com_android_audx_AudxDenoiser_processNative(
             return nullptr;
         }
 
-        // Resample output back to original rate
-        int output_samples = resampler_ctx->input_frame_samples;
-        ret = resample_frame(resampled_output, resampler_ctx->output_frame_samples,
-                             (int16_t *) output, &output_samples,
-                             resampler_ctx->output_rate, resampler_ctx->input_rate,
-                             resampler_ctx->quality);
+        // Resample output back to original rate using persistent downsampler
+        in_len = resampler_ctx->output_frame_samples;
+        out_len = resampler_ctx->input_frame_samples;
+        ret = audx_resample_process(resampler_ctx->downsampler, resampled_output,
+                                    &in_len, (int16_t *) output, &out_len);
 
         free(resampled_input);
         free(resampled_output);
 
-        if (ret != AUDX_RESAMPLER_SUCCESS) {
+        if (ret != AUDX_SUCCESS) {
             LOGE("Output resampling failed: %d", ret);
             env->ReleaseShortArrayElements(inputArray, input, JNI_ABORT);
             env->ReleaseShortArrayElements(outputArray, output, JNI_ABORT);
             return nullptr;
         }
+
+        // Update result to reflect actual output samples
+        result.samples_processed = (int) out_len;
     } else {
         // No resampling needed, process directly
         ret = denoiser_process(denoiser, input, output, &result);
 
-        if (ret != AUDX_DENOISER_SUCCESS) {
+        if (ret != AUDX_SUCCESS) {
             LOGE("Denoiser processing failed: %d", ret);
             env->ReleaseShortArrayElements(inputArray, input, JNI_ABORT);
             env->ReleaseShortArrayElements(outputArray, output, JNI_ABORT);
@@ -291,28 +273,28 @@ extern "C" JNIEXPORT jint JNICALL
 Java_com_android_audx_AudxDenoiser_getSampleRateNative(
         JNIEnv *env,
         jclass /* clazz */) {
-    return AUDX_SAMPLE_RATE_48KHZ;
+    return AUDX_DEFAULT_SAMPLE_RATE;
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_android_audx_AudxDenoiser_getChannelsNative(
         JNIEnv *env,
         jclass /* clazz */) {
-    return AUDX_CHANNELS_MONO;
+    return AUDX_DEFAULT_CHANNELS;
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_android_audx_AudxDenoiser_getBitDepthNative(
         JNIEnv *env,
         jclass /* clazz */) {
-    return AUDX_BIT_DEPTH_16;
+    return AUDX_DEFAULT_BIT_DEPTH;
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_com_android_audx_AudxDenoiser_getFrameSizeNative(
         JNIEnv *env,
         jclass /* clazz */) {
-    return AUDX_FRAME_SIZE;
+    return AUDX_DEFAULT_FRAME_SIZE;
 }
 
 extern "C" JNIEXPORT jobject JNICALL
@@ -330,7 +312,7 @@ Java_com_android_audx_AudxDenoiser_getStatsNative(
     struct DenoiserStats stats{};
     int ret = get_denoiser_stats(native_handle->denoiser, &stats);
 
-    if (ret != AUDX_DENOISER_SUCCESS) {
+    if (ret != AUDX_SUCCESS) {
         LOGE("Failed to get denoiser stats: %d", ret);
         return nullptr;
     }
@@ -390,4 +372,10 @@ Java_com_android_audx_AudxDenoiser_resetStatsNative(
     denoiser->last_frame_time = 0.0;
 
     LOGI("Denoiser statistics reset");
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_android_audx_AudxDenoiser_getFrameSamplesNative(JNIEnv *env, jobject thiz,
+                                                         jint input_rate) {
+    return get_frame_samples(input_rate);
 }

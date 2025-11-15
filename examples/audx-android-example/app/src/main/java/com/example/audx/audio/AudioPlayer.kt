@@ -37,7 +37,7 @@ class AudioPlayer {
         return try {
             // Get the minimum buffer size required by the system
             val minBufferSize = AudioTrack.getMinBufferSize(
-                AudxDenoiser.SAMPLE_RATE,
+                AudioRecorder.SAMPLE_RATE,
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT
             )
@@ -47,7 +47,7 @@ class AudioPlayer {
             }
 
             Log.i(TAG, "Initializing AudioTrack with:")
-            Log.i(TAG, "  Sample Rate: ${AudxDenoiser.SAMPLE_RATE} Hz")
+            Log.i(TAG, "  Sample Rate: ${AudioRecorder.SAMPLE_RATE} Hz")
             Log.i(TAG, "  Channels: ${AudxDenoiser.CHANNELS} (Mono)")
             Log.i(TAG, "  Bit Depth: ${AudxDenoiser.BIT_DEPTH}-bit PCM")
             Log.i(TAG, "  Min Buffer Size: $minBufferSize bytes")
@@ -59,7 +59,7 @@ class AudioPlayer {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build(),
                 AudioFormat.Builder()
-                    .setSampleRate(AudxDenoiser.SAMPLE_RATE)
+                    .setSampleRate(AudioRecorder.SAMPLE_RATE)
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                     .build(),
@@ -102,7 +102,8 @@ class AudioPlayer {
         try {
             // Write audio data in chunks
             var offset = 0
-            val chunkSize = 4800 // 100ms chunks at 48kHz
+            // 100ms chunks - automatically adjusts to sample rate (1600 at 16kHz, 4800 at 48kHz)
+            val chunkSize = AudioRecorder.SAMPLE_RATE / 10
 
             while (offset < audioData.size) {
                 // Check if we should continue playing (with lock)

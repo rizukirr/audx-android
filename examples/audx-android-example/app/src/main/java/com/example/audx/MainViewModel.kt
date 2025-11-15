@@ -72,6 +72,7 @@ class MainViewModel : ViewModel() {
                         rawAudioBuffer.clear()
                         Log.i(TAG, "Starting RAW recording")
                     }
+
                     RecordingMode.DENOISED -> {
                         denoisedAudioBuffer.clear()
                         frameCount = 0  // Reset frame counter
@@ -101,6 +102,7 @@ class MainViewModel : ViewModel() {
                                     rawAudioBuffer.addAll(audioChunk.toList())
                                     updateRawBuffer()
                                 }
+
                                 RecordingMode.DENOISED -> {
                                     // Process through denoiser
                                     denoiser?.processChunk(audioChunk)
@@ -125,6 +127,7 @@ class MainViewModel : ViewModel() {
      */
     private fun initializeDenoiser() {
         denoiser = AudxDenoiser.Builder()
+            .inputSampleRate(16000)
             .vadThreshold(0.5f)  // Default threshold
             .enableVadOutput(true)  // Enable VAD in results
             .onProcessedAudio { denoisedAudio, result ->
@@ -147,12 +150,17 @@ class MainViewModel : ViewModel() {
                     // Update buffer display (expensive operation)
                     updateDenoisedBuffer()
 
-                    Log.d(TAG, "Frame $frameCount: VAD: %.2f, Speech: ${result.isSpeech}, Buffer: ${denoisedAudioBuffer.size} samples"
-                        .format(result.vadProbability))
+                    Log.d(
+                        TAG,
+                        "Frame $frameCount: VAD: %.2f, Speech: ${result.isSpeech}, Buffer: ${denoisedAudioBuffer.size} samples"
+                            .format(result.vadProbability)
+                    )
                 } else {
                     // Still log individual frames at verbose level for debugging
-                    Log.v(TAG, "Processed ${result.samplesProcessed} samples, " +
-                            "VAD: %.2f, Speech: ${result.isSpeech}".format(result.vadProbability))
+                    Log.v(
+                        TAG, "Processed ${result.samplesProcessed} samples, " +
+                                "VAD: %.2f, Speech: ${result.isSpeech}".format(result.vadProbability)
+                    )
                 }
             }
             .build()
@@ -218,6 +226,7 @@ class MainViewModel : ViewModel() {
                 }
                 rawAudioBuffer.toShortArray()
             }
+
             RecordingMode.DENOISED -> {
                 if (denoisedAudioBuffer.isEmpty()) {
                     _state.update { it.copy(error = "No denoised audio to play") }

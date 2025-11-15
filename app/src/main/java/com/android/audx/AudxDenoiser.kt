@@ -169,6 +169,9 @@ class AudxDenoiser private constructor(
     private var streamBuffer: ShortArray
     private var bufferSize = 0  // Current number of samples in buffer
     private val bufferLock = ReentrantLock()
+
+    private var frameBufferCache: ShortArray? = null
+    private var outBufferCache: ShortArray? = null
     private val audioDispatcher = Dispatchers.Default.limitedParallelism(1)
 
     enum class ModelPreset(val value: Int) {
@@ -245,7 +248,7 @@ class AudxDenoiser private constructor(
         private var modelPreset: ModelPreset = ModelPreset.EMBEDDED
         private var modelPath: String? = null
         private var vadThreshold: Float = 0.5f
-        private var enableVadOutput: Boolean = true
+        private var isCollectStatistics: Boolean = false
         private var processedAudioCallback: ProcessedAudioCallback? = null
         private var inputSampleRate: Int = SAMPLE_RATE  // Default to 48kHz (no resampling)
         private var resampleQuality: Int = RESAMPLER_QUALITY_DEFAULT
@@ -272,7 +275,7 @@ class AudxDenoiser private constructor(
          * Enable/disable VAD output in results
          * @param value Enable VAD output (default: true)
          */
-        fun enableVadOutput(value: Boolean) = apply { this.enableVadOutput = value }
+        fun setCollectStatistics(value: Boolean) = apply { this.isCollectStatistics = value }
 
         /**
          * Set input sample rate. If not 48kHz, audio will be automatically resampled
@@ -303,7 +306,7 @@ class AudxDenoiser private constructor(
                 modelPreset = modelPreset,
                 modelPath = modelPath,
                 vadThreshold = vadThreshold,
-                enableVadOutput = enableVadOutput,
+                enableVadOutput = isCollectStatistics,
                 processedAudioCallback = processedAudioCallback,
                 inputSampleRate = inputSampleRate,
                 resampleQuality = resampleQuality
@@ -333,54 +336,50 @@ class AudxDenoiser private constructor(
         requireNotNull(processedAudioCallback) {
             "processChunk requires a callback. Use Builder.onProcessedAudio() to set one."
         }
-
-        // Validate audio chunk
-        when (val result = AudxValidator.validateChunk(input)) {
-            is ValidationResult.Success -> {
-                // Chunk is valid, proceed
-            }
-
-            is ValidationResult.Error -> {
-                throw IllegalArgumentException("Invalid audio chunk: ${result.message}")
-            }
-        }
+        require(input.isNotEmpty()) { "Input audio cannot be empty" }
 
         bufferLock.withLock {
-            // Ensure buffer has enough capacity
+            // Ensure capacity
             val requiredCapacity = bufferSize + input.size
             if (requiredCapacity > streamBuffer.size) {
-                // Grow buffer (double size or fit required capacity, whichever is larger)
                 val newCapacity = maxOf(streamBuffer.size * 2, requiredCapacity)
                 streamBuffer = streamBuffer.copyOf(newCapacity)
                 Log.d(TAG, "Buffer resized to $newCapacity samples")
             }
 
-            // Copy input samples to buffer using fast native memcpy
+            // Append input
             System.arraycopy(input, 0, streamBuffer, bufferSize, input.size)
             bufferSize += input.size
 
-            // Process all complete frames in the buffer
+            // Preallocate once (reuse!)
+            val frameBuffer = frameBufferCache ?: ShortArray(inputFrameSize).also {
+                frameBufferCache = it
+            }
+            val outBuffer = outBufferCache ?: ShortArray(inputFrameSize).also {
+                outBufferCache = it
+            }
+
+            // Process all complete frames
             while (bufferSize >= inputFrameSize) {
-                // Extract frame directly from buffer (single allocation)
-                val frame = streamBuffer.copyOfRange(0, inputFrameSize)
 
-                // Process the frame (resampling handled in native code)
-                val output = ShortArray(inputFrameSize)
-                val result = processNative(nativeHandle, frame, output)
+                // Copy frame into reusable buffer
+                System.arraycopy(streamBuffer, 0, frameBuffer, 0, inputFrameSize)
 
-                // Deliver via callback
-                if (result != null) {
-                    processedAudioCallback.invoke(output, result)
+                // Native processing
+                val status = processNative(nativeHandle, frameBuffer, outBuffer)
+
+                if (status != null) {
+                    processedAudioCallback.invoke(outBuffer, status)
                 } else {
                     Log.w(TAG, "Native processing returned null for chunk")
                 }
 
-                // Remove processed frame from buffer using fast native memcpy
-                val remainingSize = bufferSize - inputFrameSize
-                if (remainingSize > 0) {
-                    System.arraycopy(streamBuffer, inputFrameSize, streamBuffer, 0, remainingSize)
+                // Shift remaining samples left
+                val remaining = bufferSize - inputFrameSize
+                if (remaining > 0) {
+                    System.arraycopy(streamBuffer, inputFrameSize, streamBuffer, 0, remaining)
                 }
-                bufferSize = remainingSize
+                bufferSize = remaining
             }
         }
     }
@@ -471,6 +470,21 @@ class AudxDenoiser private constructor(
         resetStatsNative(nativeHandle)
     }
 
+
+    /**
+     * @brief Calculate the number of samples per frame.
+     *
+     * Computes the frame size based on a fixed 10 ms window.
+     *
+     * @param inputRate  Input sample rate in Hz.
+     * @return Number of samples in a 10 ms frame.
+     */
+    fun getFrameSamplesByRate(inputRate: Int): Int {
+        check(inputRate in 8000..192000) { "Input sample rate is not valid" }
+        return getFrameSamplesNative(inputRate)
+    }
+
+
     /**
      * Release resources
      */
@@ -507,4 +521,5 @@ class AudxDenoiser private constructor(
 
     private external fun getStatsNative(handle: Long): DenoiserStats?
     private external fun resetStatsNative(handle: Long)
+    private external fun getFrameSamplesNative(inputRate: Int): Int
 }

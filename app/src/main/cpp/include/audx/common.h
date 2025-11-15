@@ -6,38 +6,26 @@
 #define PCM_SCALE_FLOAT_MAX 32767.0f
 #define PCM_SCALE_FLOAT_MIN -32768.0f
 
-/**
- * @def AUDX_SAMPLE_RATE_48KHZ
- * @brief Standard audio sample rate used by the denoiser (48 kHz).
- *
- * RNNoise and most real-time speech enhancement models are designed to
- * operate at 48,000 samples per second.
- */
-#define AUDX_SAMPLE_RATE_48KHZ 48000
+#define AUDX_DEFAULT_CHANNELS 1
+#define AUDX_DEFAULT_VAD_THRESHOLD 0.5f
+#define AUDX_DEFAULT_STATS_ENABLED true
+#define AUDX_DEFAULT_RESAMPLE_QUALITY 4
+#define AUDX_DEFAULT_SAMPLE_RATE 48000
+#define AUDX_DEFAULT_BIT_DEPTH 16
+#define AUDX_DEFAULT_FRAME_SIZE 480
 
-/**
- * @def AUDX_CHANNELS_MONO
- * @brief Number of audio channels (mono = 1).
- *
- * The denoiser processes single-channel (mono) audio input.
- */
-#define AUDX_CHANNELS_MONO 1
+#define audx_int16_t short
+#define audx_int32_t int
+#define audx_uint16_t unsigned short
+#define audx_uint32_t unsigned int
 
-/**
- * @def AUDX_BIT_DEPTH_16
- * @brief Bit depth of the PCM audio format (16 bits per sample).
- *
- * The audio is represented as signed 16-bit integers (PCM_S16LE).
- */
-#define AUDX_BIT_DEPTH_16 16
-
-/**
- * @def AUDX_FRAME_SIZE
- * @brief Frame size in samples for one 10 ms chunk at 48 kHz.
- *
- * RNNoise operates on 480-sample frames (10 ms @ 48 kHz).
- */
-#define AUDX_FRAME_SIZE 480
+enum {
+  AUDX_SUCCESS = 0,
+  AUDX_ERROR_INVALID = -1,
+  AUDX_ERROR_MEMORY = -2,
+  AUDX_ERROR_UNSUPPORTED = -3,
+  AUDX_ERROR_EXTERNAL = -4
+};
 
 /* --- Utility Converters --- */
 #ifdef HAS_X86_SIMD
@@ -172,5 +160,17 @@ static inline void pcm_float_to_int16(const float *input, int16_t *output,
   }
 }
 #endif
+
+/**
+ * @brief Calculate the number of samples per frame.
+ *
+ * Computes the frame size based on a fixed 10 ms window.
+ *
+ * @param input_rate  Input sample rate in Hz.
+ * @return Number of samples in a 10 ms frame.
+ */
+inline audx_int32_t get_frame_samples(audx_int32_t input_rate) {
+  return input_rate * 10 / 1000;
+}
 
 #endif // AUDX_COMMON_H

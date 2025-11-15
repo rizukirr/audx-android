@@ -15,13 +15,6 @@ typedef struct RNNModel RNNModel;
 }
 #endif
 
-enum {
-  AUDX_DENOISER_SUCCESS = 0,
-  AUDX_DENOISER_ERROR_INVALID = -1,
-  AUDX_DENOISER_ERROR_MEMORY = -2,
-  AUDX_DENOISER_ERROR_MODEL = -3,
-};
-
 /**
  * @struct DenoiserConfig
  * @brief Configuration parameters for initializing and controlling the
@@ -59,12 +52,12 @@ struct DenoiserConfig {
   float vad_threshold;
 
   /**
-   * Enable or disable VAD results in the denoiser output.
+   * Enable or disable statistics collection.
    *
-   * If true, the DenoiserResult struct will include valid VAD scores and
-   * speech flags. If false, VAD is disabled and results are not computed.
+   * If true, the Denoiser and DenoiserResult structs will include valid VAD scores,
+   * speech flags and other statistics. If false, statistics are not computed.
    */
-  bool enable_vad_output;
+  bool stats_enabled;
 };
 
 /**
@@ -160,12 +153,12 @@ struct Denoiser {
   float vad_threshold;
 
   /**
-   * Enable or disable VAD output in processing results.
+   * Enable or disable statistics collection.
    *
    * If true, the denoiser computes and reports VAD probability and
-   * speech detection flags in DenoiserResult.
+   * other statistics in DenoiserResult.
    */
-  bool enable_vad_output;
+  bool stats_enabled;
 
   /**
    * Internal RNNoise state for a single channel.
