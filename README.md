@@ -5,6 +5,8 @@
 
 Blazingly Fast Real-time audio denoising and Voice Activity Detection (VAD) library for Android
 
+> [WARNING] v2.1.0 use gradle 9.0 which is breaking changes, use v2.0.0 if you are not yet migrate to gradle 9.0
+
 ## Features
 
 - **Real-time noise suppression** using Recurrent Neural Networks (RNNoise)
