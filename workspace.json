@@ -1,0 +1,590 @@
+{
+    "modules": [
+        {
+            "name": "app.main",
+            "type": null,
+            "dependencies": [
+                {
+                    "type": "moduleSource"
+                },
+                {
+                    "type": "sdk",
+                    "name": "Java SDK",
+                    "kind": "JavaSDK"
+                }
+            ],
+            "contentRoots": [
+                {
+                    "path": "<WORKSPACE>/app"
+                }
+            ]
+        },
+        {
+            "name": "app.test",
+            "type": null,
+            "dependencies": [
+                {
+                    "type": "moduleSource"
+                },
+                {
+                    "type": "sdk",
+                    "name": "Java SDK",
+                    "kind": "JavaSDK"
+                },
+                {
+                    "type": "module",
+                    "name": "app.main",
+                    "scope": "compile"
+                }
+            ],
+            "contentRoots": [
+                {
+                    "path": "<WORKSPACE>/app"
+                }
+            ]
+        },
+        {
+            "name": "audx-android.main",
+            "type": null,
+            "dependencies": [
+                {
+                    "type": "moduleSource"
+                },
+                {
+                    "type": "sdk",
+                    "name": "Java SDK",
+                    "kind": "JavaSDK"
+                }
+            ],
+            "contentRoots": [
+                {
+                    "path": "<WORKSPACE>/"
+                }
+            ]
+        },
+        {
+            "name": "audx-android.test",
+            "type": null,
+            "dependencies": [
+                {
+                    "type": "moduleSource"
+                },
+                {
+                    "type": "sdk",
+                    "name": "Java SDK",
+                    "kind": "JavaSDK"
+                },
+                {
+                    "type": "module",
+                    "name": "audx-android.main",
+                    "scope": "compile"
+                }
+            ],
+            "contentRoots": [
+                {
+                    "path": "<WORKSPACE>/"
+                }
+            ]
+        },
+        {
+            "name": "audx.main",
+            "type": null,
+            "dependencies": [
+                {
+                    "type": "moduleSource"
+                },
+                {
+                    "type": "sdk",
+                    "name": "Java SDK",
+                    "kind": "JavaSDK"
+                }
+            ],
+            "contentRoots": [
+                {
+                    "path": "<WORKSPACE>/audx"
+                }
+            ]
+        },
+        {
+            "name": "audx.test",
+            "type": null,
+            "dependencies": [
+                {
+                    "type": "moduleSource"
+                },
+                {
+                    "type": "sdk",
+                    "name": "Java SDK",
+                    "kind": "JavaSDK"
+                },
+                {
+                    "type": "module",
+                    "name": "audx.main",
+                    "scope": "compile"
+                }
+            ],
+            "contentRoots": [
+                {
+                    "path": "<WORKSPACE>/audx"
+                }
+            ]
+        }
+    ],
+    "sdks": [
+        {
+            "name": "Java SDK",
+            "type": "JavaSDK",
+            "version": null,
+            "homePath": null,
+            "roots": [
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.base",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.compiler",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.datatransfer",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.desktop",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.instrument",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.logging",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.management",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.management.rmi",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.naming",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.net.http",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.prefs",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.rmi",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.scripting",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.se",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.security.jgss",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.security.sasl",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.smartcardio",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.sql",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.sql.rowset",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.transaction.xa",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.xml",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/java.xml.crypto",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.accessibility",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.attach",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.charsets",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.compiler",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.crypto.cryptoki",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.crypto.ec",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.dynalink",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.editpad",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.graal.compiler",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.graal.compiler.management",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.hotspot.agent",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.httpserver",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.incubator.vector",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.internal.ed",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.internal.jvmstat",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.internal.le",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.internal.md",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.internal.opt",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.internal.vm.ci",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jartool",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.javadoc",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jcmd",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jconsole",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jdeps",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jdi",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jdwp.agent",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jfr",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jlink",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jpackage",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jshell",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jsobject",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.jstatd",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.localedata",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.management",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.management.agent",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.management.jfr",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.naming.dns",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.naming.rmi",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.net",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.nio.mapmode",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.sctp",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.security.auth",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.security.jgss",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.unsupported",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.unsupported.desktop",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.xml.dom",
+                    "type": "classPath"
+                },
+                {
+                    "url": "jrt:///usr/lib/jvm/default!/modules/jdk.zipfs",
+                    "type": "classPath"
+                }
+            ],
+            "additionalData": ""
+        }
+    ],
+    "kotlinSettings": [
+        {
+            "name": "Kotlin",
+            "sourceRoots": [],
+            "configFileItems": [],
+            "module": "app.main",
+            "useProjectSettings": true,
+            "implementedModuleNames": [],
+            "dependsOnModuleNames": [],
+            "additionalVisibleModuleNames": [],
+            "productionOutputPath": null,
+            "testOutputPath": null,
+            "sourceSetNames": [],
+            "isTestModule": true,
+            "externalProjectId": "",
+            "isHmppEnabled": true,
+            "pureKotlinSourceFolders": [],
+            "kind": "default",
+            "compilerArguments": null,
+            "additionalArguments": null,
+            "scriptTemplates": null,
+            "scriptTemplatesClasspath": null,
+            "outputDirectoryForJsLibraryFiles": null,
+            "targetPlatform": null,
+            "externalSystemRunTasks": [],
+            "version": 5,
+            "flushNeeded": false
+        },
+        {
+            "name": "Kotlin",
+            "sourceRoots": [],
+            "configFileItems": [],
+            "module": "app.test",
+            "useProjectSettings": true,
+            "implementedModuleNames": [],
+            "dependsOnModuleNames": [],
+            "additionalVisibleModuleNames": [
+                "app.main"
+            ],
+            "productionOutputPath": null,
+            "testOutputPath": null,
+            "sourceSetNames": [],
+            "isTestModule": true,
+            "externalProjectId": "",
+            "isHmppEnabled": true,
+            "pureKotlinSourceFolders": [],
+            "kind": "default",
+            "compilerArguments": null,
+            "additionalArguments": null,
+            "scriptTemplates": null,
+            "scriptTemplatesClasspath": null,
+            "outputDirectoryForJsLibraryFiles": null,
+            "targetPlatform": null,
+            "externalSystemRunTasks": [],
+            "version": 5,
+            "flushNeeded": false
+        },
+        {
+            "name": "Kotlin",
+            "sourceRoots": [],
+            "configFileItems": [],
+            "module": "audx-android.main",
+            "useProjectSettings": true,
+            "implementedModuleNames": [],
+            "dependsOnModuleNames": [],
+            "additionalVisibleModuleNames": [],
+            "productionOutputPath": null,
+            "testOutputPath": null,
+            "sourceSetNames": [],
+            "isTestModule": true,
+            "externalProjectId": "",
+            "isHmppEnabled": true,
+            "pureKotlinSourceFolders": [],
+            "kind": "default",
+            "compilerArguments": null,
+            "additionalArguments": null,
+            "scriptTemplates": null,
+            "scriptTemplatesClasspath": null,
+            "outputDirectoryForJsLibraryFiles": null,
+            "targetPlatform": null,
+            "externalSystemRunTasks": [],
+            "version": 5,
+            "flushNeeded": false
+        },
+        {
+            "name": "Kotlin",
+            "sourceRoots": [],
+            "configFileItems": [],
+            "module": "audx-android.test",
+            "useProjectSettings": true,
+            "implementedModuleNames": [],
+            "dependsOnModuleNames": [],
+            "additionalVisibleModuleNames": [
+                "audx-android.main"
+            ],
+            "productionOutputPath": null,
+            "testOutputPath": null,
+            "sourceSetNames": [],
+            "isTestModule": true,
+            "externalProjectId": "",
+            "isHmppEnabled": true,
+            "pureKotlinSourceFolders": [],
+            "kind": "default",
+            "compilerArguments": null,
+            "additionalArguments": null,
+            "scriptTemplates": null,
+            "scriptTemplatesClasspath": null,
+            "outputDirectoryForJsLibraryFiles": null,
+            "targetPlatform": null,
+            "externalSystemRunTasks": [],
+            "version": 5,
+            "flushNeeded": false
+        },
+        {
+            "name": "Kotlin",
+            "sourceRoots": [],
+            "configFileItems": [],
+            "module": "audx.main",
+            "useProjectSettings": true,
+            "implementedModuleNames": [],
+            "dependsOnModuleNames": [],
+            "additionalVisibleModuleNames": [],
+            "productionOutputPath": null,
+            "testOutputPath": null,
+            "sourceSetNames": [],
+            "isTestModule": true,
+            "externalProjectId": "",
+            "isHmppEnabled": true,
+            "pureKotlinSourceFolders": [],
+            "kind": "default",
+            "compilerArguments": null,
+            "additionalArguments": null,
+            "scriptTemplates": null,
+            "scriptTemplatesClasspath": null,
+            "outputDirectoryForJsLibraryFiles": null,
+            "targetPlatform": null,
+            "externalSystemRunTasks": [],
+            "version": 5,
+            "flushNeeded": false
+        },
+        {
+            "name": "Kotlin",
+            "sourceRoots": [],
+            "configFileItems": [],
+            "module": "audx.test",
+            "useProjectSettings": true,
+            "implementedModuleNames": [],
+            "dependsOnModuleNames": [],
+            "additionalVisibleModuleNames": [
+                "audx.main"
+            ],
+            "productionOutputPath": null,
+            "testOutputPath": null,
+            "sourceSetNames": [],
+            "isTestModule": true,
+            "externalProjectId": "",
+            "isHmppEnabled": true,
+            "pureKotlinSourceFolders": [],
+            "kind": "default",
+            "compilerArguments": null,
+            "additionalArguments": null,
+            "scriptTemplates": null,
+            "scriptTemplatesClasspath": null,
+            "outputDirectoryForJsLibraryFiles": null,
+            "targetPlatform": null,
+            "externalSystemRunTasks": [],
+            "version": 5,
+            "flushNeeded": false
+        }
+    ]
+}

@@ -1,10 +1,9 @@
 package com.audx.android
 
-import org.junit.Test
 import org.junit.Assert.*
+import org.junit.Test
 
 class AudxConfigTest {
-
     @Test
     fun `config with default values`() {
         val config = AudxConfig()
@@ -50,7 +49,6 @@ class AudxConfigTest {
 }
 
 class AudxBuilderTest {
-
     @Test
     fun `builder creates instance with default config`() {
         val audx = Audx.Builder().build()
@@ -62,12 +60,13 @@ class AudxBuilderTest {
 
     @Test
     fun `builder applies custom config`() {
-        val audx = Audx.Builder()
-            .config {
-                inputRate(16000)
-                resampleQuality(Audx.AUDX_RESAMPLER_QUALITY_VOIP)
-            }
-            .build()
+        val audx =
+            Audx
+                .Builder()
+                .config {
+                    inputRate(16000)
+                    resampleQuality(Audx.AUDX_RESAMPLER_QUALITY_VOIP)
+                }.build()
 
         assertNotNull(audx)
         assertFalse(audx.isClosed())
@@ -76,16 +75,15 @@ class AudxBuilderTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun `builder with invalid config throws on build`() {
-        Audx.Builder()
+        Audx
+            .Builder()
             .config {
-                resampleQuality(15)  // Invalid
-            }
-            .build()
+                resampleQuality(15) // Invalid
+            }.build()
     }
 }
 
 class AudxConstantsTest {
-
     @Test
     fun `frame rate is 48kHz`() {
         assertEquals(48000, Audx.FRAME_RATE)
@@ -108,13 +106,18 @@ class AudxConstantsTest {
     fun `resample quality constants are in valid range`() {
         assertTrue(Audx.AUDX_RESAMPLER_QUALITY_MIN >= 0)
         assertTrue(Audx.AUDX_RESAMPLER_QUALITY_MAX <= 10)
-        assertTrue(Audx.AUDX_RESAMPLER_QUALITY_DEFAULT in Audx.AUDX_RESAMPLER_QUALITY_MIN..Audx.AUDX_RESAMPLER_QUALITY_MAX)
-        assertTrue(Audx.AUDX_RESAMPLER_QUALITY_VOIP in Audx.AUDX_RESAMPLER_QUALITY_MIN..Audx.AUDX_RESAMPLER_QUALITY_MAX)
+        assertTrue(
+            Audx.AUDX_RESAMPLER_QUALITY_DEFAULT in
+                Audx.AUDX_RESAMPLER_QUALITY_MIN..Audx.AUDX_RESAMPLER_QUALITY_MAX
+        )
+        assertTrue(
+            Audx.AUDX_RESAMPLER_QUALITY_VOIP in
+                Audx.AUDX_RESAMPLER_QUALITY_MIN..Audx.AUDX_RESAMPLER_QUALITY_MAX
+        )
     }
 }
 
 class AudxExceptionTest {
-
     @Test
     fun `AudxProcessingException has correct hierarchy`() {
         val exception = AudxProcessingException("test message")

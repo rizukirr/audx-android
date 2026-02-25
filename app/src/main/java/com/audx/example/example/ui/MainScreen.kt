@@ -62,9 +62,7 @@ import com.audx.example.example.domain.RecordingState
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
-    viewModel: MainViewModel
-) {
+fun MainScreen(viewModel: MainViewModel) {
     val state by viewModel.state.collectAsState()
 
     Scaffold(
@@ -79,10 +77,11 @@ fun MainScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
             )
         },
         snackbarHost = {
@@ -102,11 +101,12 @@ fun MainScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Audio Format Info Card (using AudxDenoiser constants)
@@ -128,8 +128,10 @@ fun MainScreen(
 
             RecordingButton(
                 mode = RecordingMode.DENOISED,
-                isRecording = state.recordingState is RecordingState.Recording &&
-                    (state.recordingState as RecordingState.Recording).mode == RecordingMode.DENOISED,
+                isRecording =
+                    state.recordingState is RecordingState.Recording &&
+                            (state.recordingState as RecordingState.Recording).mode ==
+                            RecordingMode.DENOISED,
                 isEnabled = state.hasRecordPermission && state.recordingState is RecordingState.Idle,
                 onStartRecording = { viewModel.startRecording(RecordingMode.DENOISED) },
                 onStopRecording = { viewModel.stopRecording() },
@@ -170,9 +172,13 @@ fun MainScreen(
             ) {
                 PlaybackButton(
                     mode = RecordingMode.RAW,
-                    isPlaying = state.recordingState is RecordingState.Playing &&
-                        (state.recordingState as RecordingState.Playing).mode == RecordingMode.RAW,
-                    isEnabled = state.rawAudioBuffer.isNotEmpty() && state.recordingState is RecordingState.Idle,
+                    isPlaying =
+                        state.recordingState is RecordingState.Playing &&
+                                (state.recordingState as RecordingState.Playing).mode ==
+                                RecordingMode.RAW,
+                    isEnabled =
+                        state.rawAudioBuffer.isNotEmpty() &&
+                                state.recordingState is RecordingState.Idle,
                     onPlay = { viewModel.playAudio(RecordingMode.RAW) },
                     onStop = { viewModel.stopPlayback() },
                     modifier = Modifier.weight(1f)
@@ -180,9 +186,13 @@ fun MainScreen(
 
                 PlaybackButton(
                     mode = RecordingMode.DENOISED,
-                    isPlaying = state.recordingState is RecordingState.Playing &&
-                        (state.recordingState as RecordingState.Playing).mode == RecordingMode.DENOISED,
-                    isEnabled = state.denoisedAudioBuffer.isNotEmpty() && state.recordingState is RecordingState.Idle,
+                    isPlaying =
+                        state.recordingState is RecordingState.Playing &&
+                                (state.recordingState as RecordingState.Playing).mode ==
+                                RecordingMode.DENOISED,
+                    isEnabled =
+                        state.denoisedAudioBuffer.isNotEmpty() &&
+                                state.recordingState is RecordingState.Idle,
                     onPlay = { viewModel.playAudio(RecordingMode.DENOISED) },
                     onStop = { viewModel.stopPlayback() },
                     modifier = Modifier.weight(1f)
@@ -193,8 +203,12 @@ fun MainScreen(
             OutlinedButton(
                 onClick = { viewModel.clearBuffers() },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = state.recordingState is RecordingState.Idle &&
-                        (state.rawAudioBuffer.isNotEmpty() || state.denoisedAudioBuffer.isNotEmpty())
+                enabled =
+                    state.recordingState is RecordingState.Idle &&
+                            (
+                                    state.rawAudioBuffer.isNotEmpty() ||
+                                            state.denoisedAudioBuffer.isNotEmpty()
+                                    )
             ) {
                 Icon(Icons.Outlined.DeleteSweep, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -204,9 +218,10 @@ fun MainScreen(
             // Permission warning
             if (!state.hasRecordPermission) {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
@@ -238,9 +253,10 @@ fun MainScreen(
 @Composable
 fun AudioFormatCard() {
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -286,11 +302,7 @@ fun AudioFormatCard() {
  * @param isSpeechDetected Whether speech is detected (vadProbability > 0.5)
  */
 @Composable
-fun StatusCard(
-    recordingState: RecordingState,
-    vadProbability: Float,
-    isSpeechDetected: Boolean
-) {
+fun StatusCard(recordingState: RecordingState, vadProbability: Float, isSpeechDetected: Boolean) {
     Card {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -307,19 +319,21 @@ fun StatusCard(
                         is RecordingState.Playing -> Icons.Default.PlayArrow
                     },
                     contentDescription = null,
-                    tint = when (recordingState) {
-                        is RecordingState.Idle -> MaterialTheme.colorScheme.onSurface
-                        is RecordingState.Recording -> MaterialTheme.colorScheme.error
-                        is RecordingState.Playing -> MaterialTheme.colorScheme.primary
-                    }
+                    tint =
+                        when (recordingState) {
+                            is RecordingState.Idle -> MaterialTheme.colorScheme.onSurface
+                            is RecordingState.Recording -> MaterialTheme.colorScheme.error
+                            is RecordingState.Playing -> MaterialTheme.colorScheme.primary
+                        }
                 )
 
                 Text(
-                    text = when (recordingState) {
-                        is RecordingState.Idle -> "Idle"
-                        is RecordingState.Recording -> "Recording (${recordingState.mode.name})"
-                        is RecordingState.Playing -> "Playing (${recordingState.mode.name})"
-                    },
+                    text =
+                        when (recordingState) {
+                            is RecordingState.Idle -> "Idle"
+                            is RecordingState.Recording -> "Recording (${recordingState.mode.name})"
+                            is RecordingState.Playing -> "Playing (${recordingState.mode.name})"
+                        },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -327,8 +341,9 @@ fun StatusCard(
 
             // Show VAD info when recording with denoiser
             AnimatedVisibility(
-                visible = recordingState is RecordingState.Recording &&
-                        recordingState.mode == RecordingMode.DENOISED
+                visible =
+                    recordingState is RecordingState.Recording &&
+                            recordingState.mode == RecordingMode.DENOISED
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Row(
@@ -353,10 +368,12 @@ fun StatusCard(
                         Icon(
                             if (isSpeechDetected) Icons.Default.CheckCircle else Icons.Default.Cancel,
                             contentDescription = null,
-                            tint = if (isSpeechDetected)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.outline
+                            tint =
+                                if (isSpeechDetected) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.outline
+                                }
                         )
                     }
                 }

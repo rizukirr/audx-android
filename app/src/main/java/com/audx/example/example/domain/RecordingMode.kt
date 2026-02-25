@@ -16,5 +16,5 @@ enum class RecordingMode {
      * Audio processed through Audx denoiser for noise reduction.
      * When recording in this mode, both raw and denoised audio are captured.
      */
-    DENOISED
+    DENOISED,
 }

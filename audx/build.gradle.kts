@@ -1,9 +1,16 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     `maven-publish`
+}
+
+kotlin {
+    compilerOptions {
+        languageVersion = KotlinVersion.KOTLIN_2_0
+        jvmTarget = JvmTarget.JVM_21
+    }
 }
 
 android {
@@ -44,13 +51,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_11
-        }
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     publishing {
@@ -85,7 +87,9 @@ afterEvaluate {
 
                 pom {
                     name.set("Audx Android")
-                    description.set("Real-time audio denoising and Voice Activity Detection (VAD) library for Android")
+                    description.set(
+                        "Real-time audio denoising and Voice Activity Detection (VAD) library for Android"
+                    )
                     url.set("https://github.com/rizukirr/audx-android")
 
                     licenses {
@@ -104,7 +108,9 @@ afterEvaluate {
 
                     scm {
                         connection.set("scm:git:git://github.com/rizukirr/audx-android.git")
-                        developerConnection.set("scm:git:ssh://github.com/rizukirr/audx-android.git")
+                        developerConnection.set(
+                            "scm:git:ssh://github.com/rizukirr/audx-android.git"
+                        )
                         url.set("https://github.com/rizukirr/audx-android")
                     }
                 }

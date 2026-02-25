@@ -5,11 +5,11 @@ import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
 import android.util.Log
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
 /**
  * Wrapper for Android's AudioTrack that plays back PCM audio with dynamic sample rate support.
@@ -39,7 +39,6 @@ import kotlin.concurrent.withLock
  * ```
  */
 class AudioPlayer {
-
     companion object {
         private const val TAG = "AudioPlayer"
     }
@@ -72,30 +71,34 @@ class AudioPlayer {
     fun initialize(sampleRate: Int): Result<Unit> {
         return try {
             // Get the minimum buffer size required by the system
-            val minBufferSize = AudioTrack.getMinBufferSize(
-                sampleRate,
-                AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            )
+            val minBufferSize =
+                AudioTrack.getMinBufferSize(
+                    sampleRate,
+                    AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT
+                )
 
             if (minBufferSize == AudioTrack.ERROR_BAD_VALUE || minBufferSize == AudioTrack.ERROR) {
                 return Result.failure(IllegalStateException("Invalid AudioTrack configuration"))
             }
 
-            audioTrack = AudioTrack(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build(),
-                AudioFormat.Builder()
-                    .setSampleRate(sampleRate)
-                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .build(),
-                minBufferSize,
-                AudioTrack.MODE_STREAM,
-                AudioManager.AUDIO_SESSION_ID_GENERATE
-            )
+            audioTrack =
+                AudioTrack(
+                    AudioAttributes
+                        .Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build(),
+                    AudioFormat
+                        .Builder()
+                        .setSampleRate(sampleRate)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .build(),
+                    minBufferSize,
+                    AudioTrack.MODE_STREAM,
+                    AudioManager.AUDIO_SESSION_ID_GENERATE
+                )
 
             if (audioTrack?.state != AudioTrack.STATE_INITIALIZED) {
                 val errorMsg = "AudioTrack initialization failed - state: ${audioTrack?.state}"
@@ -154,13 +157,14 @@ class AudioPlayer {
 
             while (offset < audioData.size) {
                 // Check if we should continue playing (with lock)
-                val shouldContinue = lock.withLock {
-                    if (!isPlaying) {
-                        Log.i(TAG, "Playback cancelled at offset $offset")
-                        return@withLock false
+                val shouldContinue =
+                    lock.withLock {
+                        if (!isPlaying) {
+                            Log.i(TAG, "Playback cancelled at offset $offset")
+                            return@withLock false
+                        }
+                        true
                     }
-                    true
-                }
 
                 if (!shouldContinue) {
                     break
@@ -176,12 +180,13 @@ class AudioPlayer {
                 val remainingSamples = audioData.size - offset
                 val samplesToWrite = minOf(chunkSize, remainingSamples)
 
-                val written = try {
-                    track.write(audioData, offset, samplesToWrite)
-                } catch (e: IllegalStateException) {
-                    Log.w(TAG, "AudioTrack write failed: ${e.message}")
-                    break
-                }
+                val written =
+                    try {
+                        track.write(audioData, offset, samplesToWrite)
+                    } catch (e: IllegalStateException) {
+                        Log.w(TAG, "AudioTrack write failed: ${e.message}")
+                        break
+                    }
 
                 if (written < 0) {
                     Log.e(TAG, "Error writing to AudioTrack: $written")
@@ -247,7 +252,8 @@ class AudioPlayer {
                 audioTrack?.let { track ->
                     try {
                         if (track.state == AudioTrack.STATE_INITIALIZED &&
-                            track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                            track.playState == AudioTrack.PLAYSTATE_PLAYING
+                        ) {
                             track.stop()
                         }
                         track.flush()
@@ -273,7 +279,8 @@ class AudioPlayer {
                 audioTrack?.let { track ->
                     try {
                         if (track.state == AudioTrack.STATE_INITIALIZED &&
-                            track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                            track.playState == AudioTrack.PLAYSTATE_PLAYING
+                        ) {
                             track.stop()
                             Log.i(TAG, "Playback stopped")
                         }
@@ -298,7 +305,8 @@ class AudioPlayer {
                 try {
                     // Stop playback if running
                     if (track.state == AudioTrack.STATE_INITIALIZED &&
-                        track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                        track.playState == AudioTrack.PLAYSTATE_PLAYING
+                    ) {
                         track.stop()
                     }
                     // Release the track

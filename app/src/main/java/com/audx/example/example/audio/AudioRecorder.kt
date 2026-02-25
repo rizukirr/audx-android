@@ -39,7 +39,6 @@ import kotlinx.coroutines.isActive
  * ```
  */
 class AudioRecorder {
-
     companion object {
         private const val TAG = "AudioRecorder"
 
@@ -79,13 +78,16 @@ class AudioRecorder {
     fun initialize(): Result<Unit> {
         return try {
             // Get minimum buffer size required by Android
-            val minBufferSize = AudioRecord.getMinBufferSize(
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            )
+            val minBufferSize =
+                AudioRecord.getMinBufferSize(
+                    SAMPLE_RATE,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT
+                )
 
-            if (minBufferSize == AudioRecord.ERROR_BAD_VALUE || minBufferSize == AudioRecord.ERROR) {
+            if (minBufferSize == AudioRecord.ERROR_BAD_VALUE ||
+                minBufferSize == AudioRecord.ERROR
+            ) {
                 return Result.failure(IllegalStateException("Invalid AudioRecord configuration"))
             }
 
@@ -94,13 +96,14 @@ class AudioRecorder {
 
             Log.i(TAG, "AudioRecord buffer: min=$minBufferSize, using=$bufferSize")
 
-            audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize
-            )
+            audioRecord =
+                AudioRecord(
+                    MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                    SAMPLE_RATE,
+                    AudioFormat.CHANNEL_IN_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize
+                )
 
             if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
                 return Result.failure(IllegalStateException("AudioRecord initialization failed"))
@@ -139,7 +142,9 @@ class AudioRecorder {
         Log.i(TAG, "Recording started at $SAMPLE_RATE Hz")
 
         try {
-            while (currentCoroutineContext().isActive && record.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+            while (currentCoroutineContext().isActive &&
+                record.recordingState == AudioRecord.RECORDSTATE_RECORDING
+            ) {
                 val samplesRead = record.read(buffer, 0, buffer.size)
 
                 if (samplesRead > 0) {

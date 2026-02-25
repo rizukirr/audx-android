@@ -18,7 +18,8 @@ sealed class AudxException(message: String, cause: Throwable? = null) : Exceptio
  * - Native state corruption
  * - Processing on a closed Audx instance
  */
-class AudxProcessingException(message: String, cause: Throwable? = null) : AudxException(message, cause)
+class AudxProcessingException(message: String, cause: Throwable? = null) :
+    AudxException(message, cause)
 
 /**
  * Thrown when Audx instance creation fails.
@@ -29,4 +30,5 @@ class AudxProcessingException(message: String, cause: Throwable? = null) : AudxE
  * - Insufficient system resources
  * - Failed native memory allocation
  */
-class AudxInitializationException(message: String, cause: Throwable? = null) : AudxException(message, cause)
+class AudxInitializationException(message: String, cause: Throwable? = null) :
+    AudxException(message, cause)

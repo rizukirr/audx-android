@@ -1,8 +1,8 @@
 package com.audx.android
 
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Configuration for Audx audio processing.
@@ -20,7 +20,7 @@ data class AudxConfig(
 ) {
     init {
         require(
-            resampleQuality in Audx.AUDX_RESAMPLER_QUALITY_MIN..Audx.AUDX_RESAMPLER_QUALITY_MAX,
+            resampleQuality in Audx.AUDX_RESAMPLER_QUALITY_MIN..Audx.AUDX_RESAMPLER_QUALITY_MAX
         ) {
             "resampleQuality must be between " +
                 "${Audx.AUDX_RESAMPLER_QUALITY_MIN} and ${Audx.AUDX_RESAMPLER_QUALITY_MAX}, got: $resampleQuality"
@@ -82,9 +82,7 @@ data class AudxConfig(
  * @property config Configuration for audio processing
  * @see AudxConfig
  */
-class Audx(
-    private val config: AudxConfig,
-) {
+class Audx(private val config: AudxConfig) {
     init {
         System.loadLibrary("audx-android")
     }
@@ -93,9 +91,10 @@ class Audx(
     private val closed = AtomicBoolean(false)
     private val callbackLock = Any()
     private var frameCount = 0L
-    private val SKIP_FIRST_N_FRAMES = 1
 
     companion object {
+        private const val SKIP_FIRST_N_FRAMES = 1
+
         /** Native processing sample rate (48kHz) used internally by RNNoise. */
         const val FRAME_RATE: Int = 48_000
 
@@ -167,8 +166,8 @@ class Audx(
                 Audx(
                     AudxConfig(
                         inputRate = inputRate,
-                        resampleQuality = resampleQuality,
-                    ),
+                        resampleQuality = resampleQuality
+                    )
                 )
 
             audx.create()
@@ -189,17 +188,14 @@ class Audx(
         if (ptr == -1L) {
             throw AudxInitializationException(
                 "Failed to initialize Audx with " +
-                    "inputRate=${config.inputRate}, resampleQuality=${config.resampleQuality}",
+                    "inputRate=${config.inputRate}, resampleQuality=${config.resampleQuality}"
             )
         }
         denoisePtr = ptr
-        frameCount = 0  // Reset frame counter on new instance
+        frameCount = 0 // Reset frame counter on new instance
     }
 
-    private external fun denoiseCreateJNI(
-        inRate: Int,
-        resampleQuality: Int,
-    ): Long
+    private external fun denoiseCreateJNI(inRate: Int, resampleQuality: Int): Long
 
     /**
      * Processes audio samples through the denoising pipeline (explicit buffer version).
@@ -215,11 +211,7 @@ class Audx(
      * @throws IllegalArgumentException if output buffer is smaller than input buffer
      * @throws AudxProcessingException if native processing fails
      */
-    fun process(
-        input: ShortArray,
-        output: ShortArray,
-        vadProbabilityCallback: (Float) -> Unit,
-    ) {
+    fun process(input: ShortArray, output: ShortArray, vadProbabilityCallback: (Float) -> Unit) {
         checkNotClosed("process")
 
         val ptr = denoisePtr ?: error("Native pointer is null")
@@ -291,11 +283,7 @@ class Audx(
         }
     }
 
-    private external fun denoiseProcessJNI(
-        ptr: Long,
-        input: ShortArray,
-        output: ShortArray,
-    ): Float
+    private external fun denoiseProcessJNI(ptr: Long, input: ShortArray, output: ShortArray): Float
 
     private external fun denoiseDestroyJNI(ptr: Long)
 }

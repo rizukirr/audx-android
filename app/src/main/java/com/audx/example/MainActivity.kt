@@ -33,7 +33,6 @@ import com.audx.example.example.ui.theme.MyApplicationTheme
  * ensuring proper resource cleanup and permission state synchronization.
  */
 class MainActivity : ComponentActivity() {
-
     /**
      * ViewModel managing audio recording, denoising, and playback state.
      *
@@ -47,11 +46,12 @@ class MainActivity : ComponentActivity() {
      * Uses the Activity Result API to handle permission requests in a lifecycle-aware manner.
      * Updates the ViewModel state when the user grants or denies the permission.
      */
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        viewModel.updatePermission(isGranted)
-    }
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            viewModel.updatePermission(isGranted)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,10 +108,11 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         // Check permission again when returning to the app
-        val hasPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
+        val hasPermission =
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
         viewModel.updatePermission(hasPermission)
     }
 }

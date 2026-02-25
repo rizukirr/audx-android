@@ -35,9 +35,9 @@ import kotlinx.coroutines.launch
  */
 @Stable
 class MainViewModel : ViewModel() {
-
     companion object {
         private const val TAG = "MainViewModel"
+
         /** Sample rate used for all audio recording and playback (16kHz) */
         private const val SAMPLE_RATE = 16000
     }
@@ -53,10 +53,12 @@ class MainViewModel : ViewModel() {
     private var audioPlayer: AudioPlayer? = null
 
     /** Audx denoiser instance, reused across multiple recording sessions */
-    private val denoiser: Audx = Audx.Builder()
-        .inputRate(SAMPLE_RATE)
-        .resampleQuality(4)
-        .build()
+    private val denoiser: Audx =
+        Audx
+            .Builder()
+            .inputRate(SAMPLE_RATE)
+            .resampleQuality(4)
+            .build()
 
     /** Coroutine job managing the active recording session */
     private var recordingJob: Job? = null
@@ -118,33 +120,34 @@ class MainViewModel : ViewModel() {
                 audioRecorder.initialize().getOrThrow()
                 _state.update { it.copy(recordingState = RecordingState.Recording(mode)) }
 
-                recordingJob = viewModelScope.launch {
-                    audioRecorder.startRecording()
-                        .collect { audioChunk ->
-                            frameCount++
+                recordingJob =
+                    viewModelScope.launch {
+                        audioRecorder
+                            .startRecording()
+                            .collect { audioChunk ->
+                                frameCount++
 
-                            if (mode == RecordingMode.DENOISED) {
-                                // Output buffer must match input size (native outputs at input rate)
-                                val outputBuffer = ShortArray(audioChunk.size)
-                                denoiser.process(audioChunk, outputBuffer) { vad ->
-                                    _state.update {
-                                        it.copy(
-                                            vadProbability = vad,
-                                            isSpeechDetected = vad > 0.5f
-                                        )
+                                if (mode == RecordingMode.DENOISED) {
+                                    // Output buffer must match input size (native outputs at input rate)
+                                    val outputBuffer = ShortArray(audioChunk.size)
+                                    denoiser.process(audioChunk, outputBuffer) { vad ->
+                                        _state.update {
+                                            it.copy(
+                                                vadProbability = vad,
+                                                isSpeechDetected = vad > 0.5f
+                                            )
+                                        }
                                     }
+                                    denoisedAudioBuffer.addAll(outputBuffer.toList())
+                                    updateDenoisedBuffer()
                                 }
-                                denoisedAudioBuffer.addAll(outputBuffer.toList())
-                                updateDenoisedBuffer()
+
+                                // RAW mode: save raw audio without skipping
+                                rawAudioBuffer.addAll(audioChunk.toList())
+                                updateRawBuffer()
+                                totalRawSamples += audioChunk.size
                             }
-
-                            // RAW mode: save raw audio without skipping
-                            rawAudioBuffer.addAll(audioChunk.toList())
-                            updateRawBuffer()
-                            totalRawSamples += audioChunk.size
-
-                        }
-                }
+                    }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to start recording", e)
                 _state.update { it.copy(error = "Failed to start recording: ${e.message}") }
@@ -189,39 +192,45 @@ class MainViewModel : ViewModel() {
             return
         }
 
-        val audioData = when (mode) {
-            RecordingMode.RAW -> rawAudioBuffer.toShortArray()
-            RecordingMode.DENOISED -> denoisedAudioBuffer.toShortArray()
-        }
+        val audioData =
+            when (mode) {
+                RecordingMode.RAW -> rawAudioBuffer.toShortArray()
+                RecordingMode.DENOISED -> denoisedAudioBuffer.toShortArray()
+            }
 
         if (audioData.isEmpty()) {
-            val errorMessage = when (mode) {
-                RecordingMode.RAW -> "No raw audio recorded to play"
-                RecordingMode.DENOISED -> "No denoised audio recorded to play"
-            }
+            val errorMessage =
+                when (mode) {
+                    RecordingMode.RAW -> "No raw audio recorded to play"
+                    RecordingMode.DENOISED -> "No denoised audio recorded to play"
+                }
             _state.update { it.copy(error = errorMessage) }
             return
         }
 
         // Debug logging with buffer verification
-        Log.d(TAG, "Playing $mode mode: ${audioData.size} samples, " +
-                "duration = ${audioData.size.toFloat() / SAMPLE_RATE}s")
+        Log.d(
+            TAG,
+            "Playing $mode mode: ${audioData.size} samples, " +
+                "duration = ${audioData.size.toFloat() / SAMPLE_RATE}s"
+        )
         Log.d(TAG, "Buffer sizes: raw=${rawAudioBuffer.size}, denoised=${denoisedAudioBuffer.size}")
 
         if (rawAudioBuffer.size != denoisedAudioBuffer.size) {
             val difference = rawAudioBuffer.size - denoisedAudioBuffer.size
             val percentDiff = (difference.toFloat() / rawAudioBuffer.size) * 100
-            Log.e(TAG, "BUFFER SIZE MISMATCH! Difference: $difference samples (${percentDiff}%)")
+            Log.e(TAG, "BUFFER SIZE MISMATCH! Difference: $difference samples ($percentDiff%)")
         } else {
             Log.i(TAG, "Buffer sizes match perfectly")
         }
 
         viewModelScope.launch {
             try {
-                audioPlayer = AudioPlayer().apply {
-                    // Both buffers are at 16kHz
-                    initialize(SAMPLE_RATE).getOrThrow()
-                }
+                audioPlayer =
+                    AudioPlayer().apply {
+                        // Both buffers are at 16kHz
+                        initialize(SAMPLE_RATE).getOrThrow()
+                    }
 
                 _state.update { it.copy(recordingState = RecordingState.Playing(mode)) }
 

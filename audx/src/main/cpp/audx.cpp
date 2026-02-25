@@ -32,7 +32,7 @@ Java_com_audx_android_Audx_denoiseProcessJNI(JNIEnv *env, jobject /* this */,
 
 extern "C" JNIEXPORT void JNICALL Java_com_audx_android_Audx_denoiseDestroyJNI(
     JNIEnv *env, jobject /* this */, jlong ptr) {
-  auto *st = reinterpret_cast<AudxState *>(ptr); // FIX: Use AudxCtx*
+  auto *st = reinterpret_cast<AudxState *>(ptr);
   if (!st)
     return;
 

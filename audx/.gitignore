@@ -1,1 +1,4 @@
 /build
+/src/main/cpp/build/
+/src/main/cpp/.cache/
+/src/main/cpp/compile_commands.json

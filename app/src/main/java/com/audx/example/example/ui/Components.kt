@@ -57,17 +57,19 @@ fun RecordingButton(
     isEnabled: Boolean,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isRecording)
-                MaterialTheme.colorScheme.errorContainer
-            else
-                MaterialTheme.colorScheme.surfaceVariant
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (isRecording) {
+                        MaterialTheme.colorScheme.errorContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+            )
     ) {
         Button(
             onClick = {
@@ -78,29 +80,37 @@ fun RecordingButton(
                 }
             },
             enabled = isEnabled || isRecording,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isRecording)
-                    MaterialTheme.colorScheme.error
-                else
-                    MaterialTheme.colorScheme.primary,
-                contentColor = if (isRecording)
-                    MaterialTheme.colorScheme.onError
-                else
-                    MaterialTheme.colorScheme.onPrimary
-            )
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor =
+                        if (isRecording) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                    contentColor =
+                        if (isRecording) {
+                            MaterialTheme.colorScheme.onError
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        }
+                )
         ) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = if (mode == RecordingMode.RAW)
-                        Icons.Default.Mic
-                    else
-                        Icons.Default.AutoAwesome,
+                    imageVector =
+                        if (mode == RecordingMode.RAW) {
+                            Icons.Default.Mic
+                        } else {
+                            Icons.Default.AutoAwesome
+                        },
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
@@ -118,7 +128,6 @@ fun RecordingButton(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-
             }
         }
     }
@@ -151,16 +160,19 @@ fun PlaybackButton(
     isEnabled: Boolean,
     onPlay: () -> Unit,
     onStop: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isPlaying)
-                MaterialTheme.colorScheme.primaryContainer
-            else
-                MaterialTheme.colorScheme.surfaceVariant
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (isPlaying) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+            )
     ) {
         Button(
             onClick = {
@@ -171,29 +183,37 @@ fun PlaybackButton(
                 }
             },
             enabled = isEnabled || isPlaying,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isPlaying)
-                    MaterialTheme.colorScheme.tertiary
-                else
-                    MaterialTheme.colorScheme.primary,
-                contentColor = if (isPlaying)
-                    MaterialTheme.colorScheme.onTertiary
-                else
-                    MaterialTheme.colorScheme.onPrimary
-            )
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor =
+                        if (isPlaying) {
+                            MaterialTheme.colorScheme.tertiary
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                    contentColor =
+                        if (isPlaying) {
+                            MaterialTheme.colorScheme.onTertiary
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        }
+                )
         ) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = if (isPlaying)
-                        Icons.Default.Stop
-                    else
-                        Icons.Default.PlayArrow,
+                    imageVector =
+                        if (isPlaying) {
+                            Icons.Default.Stop
+                        } else {
+                            Icons.Default.PlayArrow
+                        },
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
@@ -236,24 +256,23 @@ fun PlaybackButton(
  * @param frameCount Number of audio frames that were processed
  */
 @Composable
-fun AudioBufferCard(
-    title: String,
-    sampleCount: Int,
-    durationMs: Int,
-    frameCount: Int
-) {
+fun AudioBufferCard(title: String, sampleCount: Int, durationMs: Int, frameCount: Int) {
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = if (sampleCount > 0)
-                MaterialTheme.colorScheme.tertiaryContainer
-            else
-                MaterialTheme.colorScheme.surfaceVariant
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (sampleCount > 0) {
+                        MaterialTheme.colorScheme.tertiaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
+            )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
@@ -263,20 +282,24 @@ fun AudioBufferCard(
                 Icon(
                     Icons.Default.AudioFile,
                     contentDescription = null,
-                    tint = if (sampleCount > 0)
-                        MaterialTheme.colorScheme.onTertiaryContainer
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    tint =
+                        if (sampleCount > 0) {
+                            MaterialTheme.colorScheme.onTertiaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                 )
 
                 Text(
                     title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = if (sampleCount > 0)
-                        MaterialTheme.colorScheme.onTertiaryContainer
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    color =
+                        if (sampleCount > 0) {
+                            MaterialTheme.colorScheme.onTertiaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                 )
             }
 
@@ -291,7 +314,10 @@ fun AudioBufferCard(
                         Text(
                             "Samples",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                            color =
+                                MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                                    alpha = 0.7f
+                                )
                         )
                         Text(
                             sampleCount.toString(),
@@ -305,7 +331,10 @@ fun AudioBufferCard(
                         Text(
                             "Duration",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                            color =
+                                MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                                    alpha = 0.7f
+                                )
                         )
                         Text(
                             "%.1fs".format(durationMs / 1000.0),
@@ -324,7 +353,10 @@ fun AudioBufferCard(
                         Text(
                             "Frames",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                            color =
+                                MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                                    alpha = 0.7f
+                                )
                         )
                         Text(
                             "$frameCount frames",
@@ -338,7 +370,10 @@ fun AudioBufferCard(
                         Text(
                             "Frame Size",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                            color =
+                                MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                                    alpha = 0.7f
+                                )
                         )
                         Text(
                             "480 samples",
