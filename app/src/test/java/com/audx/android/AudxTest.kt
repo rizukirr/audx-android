@@ -63,10 +63,9 @@ class AudxBuilderTest {
         val audx =
             Audx
                 .Builder()
-                .config {
-                    inputRate(16000)
-                    resampleQuality(Audx.AUDX_RESAMPLER_QUALITY_VOIP)
-                }.build()
+                .inputRate(16000)
+                .resampleQuality(Audx.AUDX_RESAMPLER_QUALITY_VOIP)
+                .build()
 
         assertNotNull(audx)
         assertFalse(audx.isClosed())
@@ -77,9 +76,8 @@ class AudxBuilderTest {
     fun `builder with invalid config throws on build`() {
         Audx
             .Builder()
-            .config {
-                resampleQuality(15) // Invalid
-            }.build()
+            .resampleQuality(15) // Invalid
+            .build()
     }
 }
 
