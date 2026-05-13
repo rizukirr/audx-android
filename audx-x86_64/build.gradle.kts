@@ -68,7 +68,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 from(components["release"])
 
-                groupId = "com.github.rizukirr"
+                groupId = "com.github.rizukirr.audx-android"
                 artifactId = "audx-x86_64"
                 version = findProperty("VERSION_NAME")?.toString() ?: "0.0.1-SNAPSHOT"
 

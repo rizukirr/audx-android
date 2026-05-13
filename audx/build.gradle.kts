@@ -12,7 +12,7 @@ plugins {
     `maven-publish`
 }
 
-group = "com.github.rizukirr"
+group = "com.github.rizukirr.audx-android"
 version = findProperty("VERSION_NAME")?.toString() ?: "0.0.1-SNAPSHOT"
 
 publishing {
@@ -55,7 +55,7 @@ publishing {
                     val deps = asNode().appendNode("dependencies")
                     listOf("audx-core", "audx-arm64-v8a", "audx-x86_64").forEach { artifact ->
                         deps.appendNode("dependency").apply {
-                            appendNode("groupId", "com.github.rizukirr")
+                            appendNode("groupId", "com.github.rizukirr.audx-android")
                             appendNode("artifactId", artifact)
                             appendNode("version", project.version.toString())
                             appendNode("scope", "compile")

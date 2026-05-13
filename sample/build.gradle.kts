@@ -70,7 +70,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation("com.github.rizukirr:audx:0.0.1-SNAPSHOT")
+    implementation("com.github.rizukirr.audx-android:audx:0.0.1-SNAPSHOT")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
