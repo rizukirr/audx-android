@@ -26,3 +26,4 @@ rootProject.name = "audx-android"
 include(":app")
 include(":audx")
 include(":audx-core")
+include(":audx-arm64-v8a")
