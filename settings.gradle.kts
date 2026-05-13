@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "audx-android"
 include(":app")
 include(":audx")
+include(":audx-core")
