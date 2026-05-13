@@ -1,31 +1,29 @@
+// Meta artifact for audx-android.
+//
+// Publishes only a POM declaring three runtime dependencies (audx-core,
+// audx-arm64-v8a, audx-x86_64). No source, no .jar, no .aar.
+//
+// We deliberately do NOT apply `java-library`: that plugin's `api(project(...))`
+// pulls in Android-library variant attributes (AgpVersionAttr, BuildTypeAttr,
+// VariantAttr) that a plain Java consumer doesn't know how to match, so resolution
+// fails. By skipping `java-library` and synthesizing the POM via `withXml`, we
+// avoid the variant-matching machinery entirely and ship exactly what we want.
 plugins {
-    `java-library`
     `maven-publish`
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-    withSourcesJar()
-    withJavadocJar()
-}
-
-dependencies {
-    api(project(":audx-core"))
-    api(project(":audx-arm64-v8a"))
-    api(project(":audx-x86_64"))
-}
+group = "com.github.rizukirr"
+version = findProperty("VERSION_NAME")?.toString() ?: "0.0.1-SNAPSHOT"
 
 publishing {
     publications {
         create<MavenPublication>("release") {
-            from(components["java"])
-
-            groupId = "com.github.rizukirr"
             artifactId = "audx"
-            version = findProperty("VERSION_NAME")?.toString() ?: "0.0.1-SNAPSHOT"
+            // No `from(components[...])` — POM-only artifact.
 
             pom {
+                packaging = "pom"
+
                 name.set("Audx Android (meta)")
                 description.set(
                     "Meta artifact for Audx Android — pulls in audx-core plus the default ABI " +
@@ -49,6 +47,20 @@ publishing {
                     connection.set("scm:git:git://github.com/rizukirr/audx-android.git")
                     developerConnection.set("scm:git:ssh://github.com/rizukirr/audx-android.git")
                     url.set("https://github.com/rizukirr/audx-android")
+                }
+
+                // Hand-write the <dependencies> block so consumers transitively
+                // get the three child artifacts at the same version as this meta.
+                withXml {
+                    val deps = asNode().appendNode("dependencies")
+                    listOf("audx-core", "audx-arm64-v8a", "audx-x86_64").forEach { artifact ->
+                        deps.appendNode("dependency").apply {
+                            appendNode("groupId", "com.github.rizukirr")
+                            appendNode("artifactId", artifact)
+                            appendNode("version", project.version.toString())
+                            appendNode("scope", "compile")
+                        }
+                    }
                 }
             }
         }
