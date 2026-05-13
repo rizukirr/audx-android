@@ -1,48 +1,36 @@
-# For more information about using CMake with Android Studio, read the
-# documentation: https://d.android.com/studio/projects/add-native-code.html.
-# For more examples on how to use CMake, see https://github.com/android/ndk-samples.
-
-# Sets the minimum CMake version required for this project.
+# Canonical audx-android JNI bridge build.
+#
+# Intended use:
+#   - In the legacy `:audx` Android library: this file is the top-level CMakeLists,
+#     reached via android.externalNativeBuild.cmake.path. `project()` is called here.
+#   - In each per-ABI module (audx-arm64-v8a, audx-x86_64, ...): a small shim
+#     CMakeLists.txt in that module sets AUDX_PREBUILT_ROOT and `include()`s this file.
+#     The shim calls `project()`; this file detects that and does NOT call `project()` again.
 cmake_minimum_required(VERSION 3.22.1)
 
-# Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
-# Since this is the top level CMakeLists.txt, the project name is also accessible
-# with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
-# build script scope).
-project("audx-android")
+if(NOT PROJECT_NAME)
+    project("audx-android")
+endif()
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
-#
-# In this top level CMakeLists.txt, ${CMAKE_PROJECT_NAME} is used to define
-# the target library name; in the sub-module's CMakeLists.txt, ${PROJECT_NAME}
-# is preferred for the same purpose.
-#
-# In order to load a library into your app from Java/Kotlin, you must call
-# System.loadLibrary() and pass the name of the library defined here;
-# for GameActivity/NativeActivity derived applications, the same library name must be
-# used in the AndroidManifest.xml file.
-add_library(${CMAKE_PROJECT_NAME} SHARED
-        # List C/C++ source files with relative paths to this CMakeLists.txt.
-        audx.cpp
-        audx.h)
+# AUDX_PREBUILT_ROOT points at the directory that contains <ABI>/libaudx_src.so.
+# When invoked from the legacy :audx layout it defaults to ../libs relative to this file
+# (i.e. audx/src/main/libs). Per-ABI modules override it before include()'ing this file.
+if(NOT DEFINED AUDX_PREBUILT_ROOT)
+    set(AUDX_PREBUILT_ROOT "${CMAKE_CURRENT_LIST_DIR}/../libs")
+endif()
 
-# Include directories
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-        .)
+add_library(audx-android SHARED
+        ${CMAKE_CURRENT_LIST_DIR}/audx.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/audx.h)
 
-# Import prebuilt libaudx_src.so library
+target_include_directories(audx-android PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR})
+
 add_library(audx_src SHARED IMPORTED)
 set_target_properties(audx_src PROPERTIES
-        IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../libs/${ANDROID_ABI}/libaudx_src.so)
+        IMPORTED_LOCATION ${AUDX_PREBUILT_ROOT}/${ANDROID_ABI}/libaudx_src.so)
 
-# Specifies libraries CMake should link to your target library. You
-# can link libraries from various origins, such as libraries defined in this
-# build script, prebuilt third-party libraries, or Android system libraries.
-target_link_libraries(${CMAKE_PROJECT_NAME}
-        # List libraries link to the target library
+target_link_libraries(audx-android
         audx_src
         android
         log)
