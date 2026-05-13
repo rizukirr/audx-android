@@ -1,118 +1,54 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-
 plugins {
-    alias(libs.plugins.android.library)
+    `java-library`
     `maven-publish`
 }
 
-kotlin {
-    compilerOptions {
-        languageVersion = KotlinVersion.KOTLIN_2_0
-        jvmTarget = JvmTarget.JVM_21
-    }
-}
-
-android {
-    namespace = "com.audx.android"
-    compileSdk {
-        version = release(36)
-    }
-
-    defaultConfig {
-        minSdk = 24
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags("")
-                arguments += listOf("-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON")
-            }
-        }
-
-        ndk {
-            abiFilters.addAll(setOf("arm64-v8a", "x86_64"))
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    externalNativeBuild {
-        cmake {
-            path("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
+    withJavadocJar()
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
+    api(project(":audx-core"))
+    api(project(":audx-arm64-v8a"))
+    api(project(":audx-x86_64"))
 }
 
-// Maven publishing configuration for JitPack
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            from(components["java"])
 
-                groupId = "com.github.rizukirr"
-                artifactId = "audx"
-                version = findProperty("VERSION_NAME")?.toString() ?: "1.0.0"
+            groupId = "com.github.rizukirr"
+            artifactId = "audx"
+            version = findProperty("VERSION_NAME")?.toString() ?: "0.0.1-SNAPSHOT"
 
-                pom {
-                    name.set("Audx Android")
-                    description.set(
-                        "Real-time audio denoising and Voice Activity Detection (VAD) library for Android"
-                    )
+            pom {
+                name.set("Audx Android (meta)")
+                description.set(
+                    "Meta artifact for Audx Android — pulls in audx-core plus the default ABI " +
+                        "set (arm64-v8a + x86_64). Cherry-pick alternative: depend on audx-core " +
+                        "plus only the audx-<abi> modules you need."
+                )
+                url.set("https://github.com/rizukirr/audx-android")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("rizukirr")
+                        name.set("Rizki")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/rizukirr/audx-android.git")
+                    developerConnection.set("scm:git:ssh://github.com/rizukirr/audx-android.git")
                     url.set("https://github.com/rizukirr/audx-android")
-
-                    licenses {
-                        license {
-                            name.set("MIT License")
-                            url.set("https://opensource.org/licenses/MIT")
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id.set("rizukirr")
-                            name.set("Rizki")
-                        }
-                    }
-
-                    scm {
-                        connection.set("scm:git:git://github.com/rizukirr/audx-android.git")
-                        developerConnection.set(
-                            "scm:git:ssh://github.com/rizukirr/audx-android.git"
-                        )
-                        url.set("https://github.com/rizukirr/audx-android")
-                    }
                 }
             }
         }
