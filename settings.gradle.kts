@@ -19,9 +19,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
     }
 }
 
 rootProject.name = "audx-android"
-include(":app")
+include(":audx-core")
+include(":audx-arm64-v8a")
+include(":audx-x86_64")
 include(":audx")
+include(":sample")
