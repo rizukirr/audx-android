@@ -30,6 +30,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        ndk {
+            abiFilters.addAll(setOf("arm64-v8a"))
+        }
     }
 
     buildTypes {
@@ -70,7 +73,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation("com.github.rizukirr.audx-android:audx:0.0.1-SNAPSHOT")
+    // Cherry-pick arm64-v8a only — drops x86_64 native payload from the APK.
+    // Swap in additional `audx-<abi>` lines (or use the meta `audx` artifact)
+    // if you want emulator or armv7 support back.
+    implementation("com.github.rizukirr.audx-android:audx-core:0.0.1-SNAPSHOT")
+    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:0.0.1-SNAPSHOT")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
