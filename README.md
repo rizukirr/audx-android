@@ -12,7 +12,7 @@ Blazingly Fast Real-time audio denoising and Voice Activity Detection (VAD) libr
 - **Real-time noise suppression** using Recurrent Neural Networks (RNNoise)
 - **Voice Activity Detection (VAD)** with probability scores (0.0-1.0)
 - **Automatic sample rate conversion** - works with any input rate (8kHz, 16kHz, 48kHz, etc.)
-- **High performance** - SIMD optimized for ARM64 and x86_64
+- **High performance** - SIMD optimized for ARM64, ARMv7 (NEON required), and x86_64
 - **Coroutine support** - async processing with Kotlin coroutines
 - **Small footprint** - native libraries optimized for mobile
 - **Simple API** - easy integration with AudioRecord/AudioTrack
@@ -32,13 +32,30 @@ dependencyResolutionManagement {
 }
 ```
 
-Add the dependency to your app's `build.gradle.kts`:
+Add the dependency to your app's `build.gradle.kts`. From `v2.1.2-alpha01` the library is split into per-ABI modules so consumers can either pull the slim default or cherry-pick exactly the ABIs they ship.
+
+**Slim default** (arm64-v8a + x86_64 — covers production phones and most emulators):
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr:audx-android:v2.1.0")
+    implementation("com.github.rizukirr.audx-android:audx:v2.1.2-alpha02")
 }
 ```
+
+**Cherry-pick** (e.g. arm64-only, or armv7 device support):
+
+```kotlin
+dependencies {
+    implementation("com.github.rizukirr.audx-android:audx-core:v2.1.2-alpha02")
+
+    // Pick any subset:
+    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:v2.1.2-alpha02")
+    implementation("com.github.rizukirr.audx-android:audx-armeabi-v7a:v2.1.2-alpha02") // armv7
+    implementation("com.github.rizukirr.audx-android:audx-x86_64:v2.1.2-alpha02")       // emulator on Intel hosts
+}
+```
+
+Each per-ABI module ships only that ABI's native libraries (~15 MB), so cherry-picking keeps your APK lean. Replace the version with the latest tag from the JitPack badge above.
 
 ## Quick Start
 
@@ -248,7 +265,7 @@ fun isClosed(): Boolean  // Check if instance is closed
 ## Supported Platforms
 
 - **Minimum SDK**: Android 24 (Android 7.0)
-- **Architectures**: ARM64 (arm64-v8a), x86_64
+- **Architectures**: ARM64 (arm64-v8a), ARMv7 (armeabi-v7a, NEON required), x86_64
 - **NDK**: Built with CMake 3.22.1
 
 ## License
