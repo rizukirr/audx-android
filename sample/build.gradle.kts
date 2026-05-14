@@ -30,6 +30,13 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        // Optional: clamp the APK to arm64-v8a. The audx cherry-pick alone
+        // would already produce arm64-only audx binaries, but transitive
+        // deps (e.g. androidx.graphics.path) ship universal native libs;
+        // abiFilters strips the unused ABIs from those too.
+        ndk {
+            abiFilters.addAll(setOf("arm64-v8a"))
+        }
     }
 
     buildTypes {

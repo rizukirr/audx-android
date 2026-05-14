@@ -57,6 +57,20 @@ dependencies {
 
 Each per-ABI module ships only that ABI's native libraries (~15 MB), so cherry-picking keeps your APK lean. Replace the version with the latest tag from the JitPack badge above.
 
+> **Optional but recommended for true single-ABI APKs:** the cherry-pick above controls *audx*'s footprint, but transitive deps from AndroidX/Compose can still ship universal native libs (covering all four ABIs). To strip those too, add an `abiFilters` clamp in your app module's `defaultConfig`:
+>
+> ```kotlin
+> android {
+>     defaultConfig {
+>         ndk {
+>             abiFilters.addAll(setOf("arm64-v8a"))  // or your target set
+>         }
+>     }
+> }
+> ```
+>
+> `abiFilters` and the cherry-pick solve different problems and compose cleanly — use both together when you want a truly arm64-only (or armv7-only, etc.) APK.
+
 ## Quick Start
 
 ### Basic Usage
