@@ -32,13 +32,13 @@ dependencyResolutionManagement {
 }
 ```
 
-Add the dependency to your app's `build.gradle.kts`. From `v2.1.2-alpha01` the library is split into per-ABI modules so consumers can either pull the slim default or cherry-pick exactly the ABIs they ship.
+Add the dependency to your app's `build.gradle.kts`. From `v2.1.2` the library is split into per-ABI modules so consumers can either pull the slim default or cherry-pick exactly the ABIs they ship.
 
 **Slim default** (arm64-v8a + x86_64 — covers production phones and most emulators):
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr.audx-android:audx:v2.1.2-alpha02")
+    implementation("com.github.rizukirr.audx-android:audx:v2.1.2")
 }
 ```
 
@@ -46,12 +46,12 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr.audx-android:audx-core:v2.1.2-alpha02")
+    implementation("com.github.rizukirr.audx-android:audx-core:v2.1.2")
 
     // Pick any subset:
-    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:v2.1.2-alpha02")
-    implementation("com.github.rizukirr.audx-android:audx-armeabi-v7a:v2.1.2-alpha02") // armv7
-    implementation("com.github.rizukirr.audx-android:audx-x86_64:v2.1.2-alpha02")       // emulator on Intel hosts
+    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:v2.1.2")
+    implementation("com.github.rizukirr.audx-android:audx-armeabi-v7a:v2.1.2") // armv7
+    implementation("com.github.rizukirr.audx-android:audx-x86_64:v2.1.2")       // emulator on Intel hosts
 }
 ```
 
