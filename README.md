@@ -295,6 +295,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 If you encounter any issues or have questions:
 - Open an issue on [GitHub](https://github.com/rizukirr/audx-android/issues)
 - If you find this project helpful, consider ☕ [Buy Me a Coffee](https://ko-fi.com/rizukirr)
----
-
-Made with ❤️ by [Rizki](https://github.com/rizukirr)
