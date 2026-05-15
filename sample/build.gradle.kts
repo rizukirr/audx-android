@@ -80,8 +80,8 @@ dependencies {
     // Cherry-pick arm64-v8a only — drops x86_64 native payload from the APK.
     // Swap in additional `audx-<abi>` lines (or use the meta `audx` artifact)
     // if you want emulator or armv7 support back.
-    implementation("com.github.rizukirr.audx-android:audx-core:2.1.2")
-    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:2.1.2")
+    implementation(libs.audx.core)
+    implementation(libs.audx.arm64.v8a)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
