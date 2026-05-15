@@ -22,3 +22,5 @@ kls_database.db
 /AGENTS.md
 docs/
 .vibe-worktrees/
+/.claude
+/gradle
