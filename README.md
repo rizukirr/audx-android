@@ -38,7 +38,7 @@ Add the dependency to your app's `build.gradle.kts`. From `v2.1.2` the library i
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr.audx-android:audx:v2.1.2")
+    implementation("com.github.rizukirr.audx-android:audx:v2.1.3")
 }
 ```
 
@@ -46,12 +46,12 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr.audx-android:audx-core:v2.1.2")
+    implementation("com.github.rizukirr.audx-android:audx-core:v2.1.3")
 
     // Pick any subset:
-    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:v2.1.2")
-    implementation("com.github.rizukirr.audx-android:audx-armeabi-v7a:v2.1.2") // armv7
-    implementation("com.github.rizukirr.audx-android:audx-x86_64:v2.1.2")       // emulator on Intel hosts
+    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:v2.1.3")
+    implementation("com.github.rizukirr.audx-android:audx-armeabi-v7a:v2.1.3") // armv7
+    implementation("com.github.rizukirr.audx-android:audx-x86_64:v2.1.3")       // emulator on Intel hosts
 }
 ```
 
