@@ -16,11 +16,14 @@ kotlin {
 android {
     namespace = "com.audx.android.x86_64"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         minSdk = 24
+        aarMetadata {
+            minCompileSdk = 36
+        }
         ndk {
             abiFilters.addAll(setOf("x86_64"))
         }

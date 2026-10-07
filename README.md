@@ -36,7 +36,7 @@ Add the dependency to your app's `build.gradle.kts`. From `v2.1.2` the library i
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr.audx-android:audx:v2.1.3")
+    implementation("com.github.rizukirr.audx-android:audx:v3.0.0")
 }
 ```
 
@@ -44,12 +44,12 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.github.rizukirr.audx-android:audx-core:v2.1.3")
+    implementation("com.github.rizukirr.audx-android:audx-core:v3.0.0")
 
     // Pick any subset:
-    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:v2.1.3")
-    implementation("com.github.rizukirr.audx-android:audx-armeabi-v7a:v2.1.3") // armv7
-    implementation("com.github.rizukirr.audx-android:audx-x86_64:v2.1.3")       // emulator on Intel hosts
+    implementation("com.github.rizukirr.audx-android:audx-arm64-v8a:v3.0.0")
+    implementation("com.github.rizukirr.audx-android:audx-armeabi-v7a:v3.0.0") // armv7
+    implementation("com.github.rizukirr.audx-android:audx-x86_64:v3.0.0")       // emulator on Intel hosts
 }
 ```
 
@@ -277,6 +277,8 @@ fun isClosed(): Boolean  // Check if instance is closed
 ## Supported Platforms
 
 - **Minimum SDK**: Android 24 (Android 7.0)
+- **Compile SDK**: 36 or newer in the consuming app
+- **Kotlin**: 2.3 or newer in the consuming app (from `v3.0.0`, which ships `kotlin-stdlib` 2.4.20)
 - **Architectures**: ARM64 (arm64-v8a), ARMv7 (armeabi-v7a, NEON required), x86_64
 - **NDK**: Built with CMake 3.22.1
 

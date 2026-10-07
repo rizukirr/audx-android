@@ -16,11 +16,14 @@ kotlin {
 android {
     namespace = "com.audx.android.armeabiv7a"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         minSdk = 24
+        aarMetadata {
+            minCompileSdk = 36
+        }
         ndk {
             abiFilters.addAll(setOf("armeabi-v7a"))
         }
