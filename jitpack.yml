@@ -1,7 +1,6 @@
 jdk:
   - openjdk21
-before_install:
-  - sdk install java 21.0.4-tem
-  - sdk use java 21.0.4-tem
 install:
-  - ./gradlew publishToMavenLocal
+  # The sdkman JDKs cannot open jar files on some JitPack build hosts, so
+  # prefer the JDK 21 that ships in the build image when it is present.
+  - if [ -x /usr/lib/jvm/java-21-openjdk-amd64/bin/java ]; then export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64; export PATH="$JAVA_HOME/bin:$PATH"; fi; java -version; ./gradlew publishToMavenLocal
