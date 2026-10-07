@@ -16,11 +16,14 @@ kotlin {
 android {
     namespace = "com.audx.android"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     defaultConfig {
         minSdk = 24
+        aarMetadata {
+            minCompileSdk = 36
+        }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -51,9 +54,6 @@ android {
 dependencies {
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
